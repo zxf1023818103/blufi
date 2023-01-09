@@ -13,7 +13,7 @@ public:
     explicit BlufiScanner(QObject *parent = nullptr);
 
 signals:
-    void finished();
+    void clientAllDestroyed();
 
     void blufiClientReady(BlufiClient *client);
 
@@ -26,8 +26,12 @@ private slots:
 
     void onScanFinished();
 
+    void onBlufiClientDestroyed();
+
 private:
     bool m_deepScan = false;
+
+    QAtomicInt m_globalCount;
 
     QBluetoothDeviceDiscoveryAgent *m_discoveryAgent = nullptr;
 

@@ -36,6 +36,12 @@ public slots:
 private slots:
     void onBlufiClientReady(BlufiClient *client);
 
+    void onDataFrameReceived(BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone);
+
+    void onControlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone);
+
+    void onBlufiClientAllDestroyed();
+
 signals:
     void finished();
 };

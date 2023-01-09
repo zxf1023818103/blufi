@@ -37,30 +37,36 @@ void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
 
     if (blufiServiceFound || m_deepScan) {
         BlufiClient *client = new BlufiClient(info, this);
+        m_globalCount++;
+
         connect(client, &BlufiClient::ready, this, &BlufiScanner::onBlufiClientReady);
+        connect(client, &BlufiClient::destroyed, this, &BlufiScanner::onBlufiClientDestroyed);
+        
         client->connectToDevice();
     }
 }
 
 void BlufiScanner::onBlufiClientReady()
 {
-    qDebug() << __func__;
+    qDebug() << (QString(metaObject()->className()) + "::" + __func__);
 
     emit blufiClientReady(qobject_cast<BlufiClient*>(sender()));
 }
 
 void BlufiScanner::onBlufiServiceNotFound()
 {
-    qDebug() << __func__;
+    qDebug() << (QString(metaObject()->className()) + "::" + __func__);
 
     sender()->deleteLater();
 }
 
 void BlufiScanner::onScanFinished()
 {
-    qDebug() << __func__;
+    qDebug() << (QString(metaObject()->className()) + "::" + __func__);
 
-    emit finished();
+    if (m_globalCount == 0) {
+        emit clientAllDestroyed();
+    }
 }
 
 void BlufiScanner::start()
@@ -89,5 +95,14 @@ void BlufiScanner::setAddressFilter(const QString &addressFilter)
 
     if (!addressFilter.isEmpty()) {
         m_addressFilter = new QRegularExpression(addressFilter);
+    }
+}
+
+void BlufiScanner::onBlufiClientDestroyed()
+{
+    m_globalCount--;
+
+    if (!m_discoveryAgent->isActive() && m_globalCount == 0) {
+        emit clientAllDestroyed();
     }
 }

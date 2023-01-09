@@ -17,19 +17,19 @@ BlufiClient::BlufiClient(const QBluetoothDeviceInfo& info, QObject *parent)
 
 void BlufiClient::onConnected()
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__;
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
 
     m_controller->discoverServices();
 }
 
 void BlufiClient::onDisconnected()
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__;
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
 }
 
 void BlufiClient::onConnectionUpdated(const QLowEnergyConnectionParameters &parameters)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << "latency" << parameters.latency()
              << "maximiumInterval" << parameters.maximumInterval()
              << "minimiumInterval" << parameters.minimumInterval()
@@ -38,7 +38,7 @@ void BlufiClient::onConnectionUpdated(const QLowEnergyConnectionParameters &para
 
 void BlufiClient::onServiceDiscoveryFinished()
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__;
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
 
     if (m_service != nullptr) {
         m_service->discoverDetails();
@@ -50,7 +50,7 @@ void BlufiClient::onServiceDiscoveryFinished()
 
 void BlufiClient::onServiceDiscovered(const QBluetoothUuid &newService)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << newService;
 
     if (m_service == nullptr) {
@@ -71,19 +71,19 @@ void BlufiClient::onServiceDiscovered(const QBluetoothUuid &newService)
 
 void BlufiClient::onControllerErrorOccurred(QLowEnergyController::Error newError)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << newError;
 }
 
 void BlufiClient::onMtuChanged(int mtu)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << mtu;
 }
 
 void BlufiClient::onControllerStateChanged(QLowEnergyController::ControllerState state)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << state;
 }
 
@@ -92,14 +92,14 @@ void BlufiClient::connectToDevice()
     m_controller->connectToDevice();
 }
 
-void BlufiClient::send(const QByteArrayView &data)
+void BlufiClient::send(const QByteArray &data)
 {
     m_service->writeCharacteristic(m_p2eCharacteristic, QByteArray().append(data), QLowEnergyService::WriteWithoutResponse);
 }
 
 void BlufiClient::onServiceStateChanged(QLowEnergyService::ServiceState newState)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << newState;
 
     if (newState == QLowEnergyService::RemoteServiceDiscovered) {
@@ -128,7 +128,7 @@ void BlufiClient::onServiceStateChanged(QLowEnergyService::ServiceState newState
 
 void BlufiClient::onCharacteristicChanged(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << info.uuid() << value;
 
     if (info == m_e2pCharacteristic) {
@@ -138,35 +138,35 @@ void BlufiClient::onCharacteristicChanged(const QLowEnergyCharacteristic &info, 
 
 void BlufiClient::onCharacteristicRead(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << info.uuid() << value;
 }
 
 void BlufiClient::onCharacteristicWritten(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << info.uuid() << value;
 }
 
 void BlufiClient::onDescriptorRead(const QLowEnergyDescriptor &info, const QByteArray &value)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << info.uuid() << value;
 }
 
 void BlufiClient::onDescriptorWritten(const QLowEnergyDescriptor &info, const QByteArray &value)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << info.uuid() << value;
 }
 
 void BlufiClient::onServiceErrorOccurred(QLowEnergyService::ServiceError error)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << error;
 }
 
 void BlufiClient::onDestroyed(QObject *obj)
 {
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << __func__;
+    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
 }

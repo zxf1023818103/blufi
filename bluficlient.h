@@ -7,6 +7,7 @@
 class BlufiClient : public QObject
 {
     Q_OBJECT
+    
 public:
     static const quint16 BLUFI_SERVICE_UUID = 0xFFFF;
 
@@ -15,6 +16,8 @@ public:
     static const quint16 BLUFI_E2P_UUID = 0xFF02;
 
     explicit BlufiClient(const QBluetoothDeviceInfo& info, QObject *parent = nullptr);
+
+    inline QLowEnergyController* controller() { return m_controller; }
 
 private:
     QLowEnergyController *m_controller = nullptr;
@@ -30,7 +33,7 @@ signals:
 
     void serviceNotFound();
 
-    void dataReceived(const QByteArrayView& data);
+    void dataReceived(const QByteArray& data);
 
 private slots:
     void onConnected();
@@ -68,7 +71,7 @@ private slots:
 public slots:
     void connectToDevice();
 
-    void send(const QByteArrayView &data);
+    void send(const QByteArray &data);
 };
 
 #endif // BLUFICLIENT_H

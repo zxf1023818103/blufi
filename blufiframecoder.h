@@ -110,14 +110,18 @@ private:
 
     quint8 m_fragmentSize = 230;
 
-    void sendFrame(quint8 type, const QByteArrayView &data, bool toPhone, bool ack);
+    void sendFrame(quint8 type, const QByteArray &data, bool toPhone, bool ack);
+
+    void parseDecryptedData(const QByteArray &data, bool toPhone);
+
+    void dispatchFrame(quint8 frameType, quint8 frameSubType, const QByteArray &data, bool toPhone);
 
 signals:
-    void encodedDataGenerated(const QByteArrayView &data, bool toPhone);
+    void encodedDataGenerated(const QByteArray &data, bool toPhone);
 
-    void dataFrameReceived(BlufiFrameCoder::DataFrameTypes type, const QByteArrayView &data, bool toPhone);
+    void dataFrameReceived(BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone);
 
-    void controlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArrayView &data, bool toPhone);
+    void controlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone);
 
     void errorOccurred(BlufiFrameCoder::Errors error);
 
@@ -134,15 +138,21 @@ public slots:
 
     inline void setDataFrameSecurityMode(BlufiFrameCoder::SecurityModes dataFrameSecurityMode) { m_dataFrameSecurityMode = dataFrameSecurityMode; }
 
-    void parseReceivedData(const QByteArrayView &data, bool toPhone);
+    void parseReceivedData(const QByteArray &data, bool toPhone);
 
-    void sendDataFrame(BlufiFrameCoder::DataFrameTypes type, const QByteArrayView &data, bool toPhone, bool ack);
+    void sendDataFrame(BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone, bool ack);
 
-    void sendControlFrame(BlufiFrameCoder::ControlFrameTypes type, const QByteArrayView &data, bool toPhone, bool ack);
+    void sendControlFrame(BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone, bool ack);
 
-    void sendAckFrame(quint8 sequenceNo, bool toPhone);
+    void sendAck(quint8 sequenceNo, bool toPhone);
 
-    void sendErrorFrame(BlufiFrameCoder::Errors, bool toPhone);
+    void sendError(BlufiFrameCoder::Errors, bool toPhone);
+
+    void sendStaSsid(const QString &ssid, bool toPhone);
+
+    void sendStaPassword(const QString &password, bool toPhone);
+
+    void sendStaConnectionRequest(bool toPhone);
 };
 
 #endif // BLUFIFRAMECODER_H

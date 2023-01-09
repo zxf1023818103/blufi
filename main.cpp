@@ -19,10 +19,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    QCommandLineOption nameOption(QStringList() << "n" << "name", QObject::tr("Blufi device name filter (Could use regular expression)"));
-    QCommandLineOption addressOption(QStringList() << "a" << "address", QObject::tr("Bluetooth LE MAC address filter (Could use regular expression)"));
-    QCommandLineOption ssidOption(QStringList() << "s" << "ssid", QObject::tr("SSID of Wi-Fi hotspot"));
-    QCommandLineOption pskOption(QStringList() << "p" << "psk", QObject::tr("Pre-shared key of Wi-Fi hotspot"));
+    QCommandLineOption nameOption(QStringList() << "n" << "name", QObject::tr("Blufi device name filter (Could use regular expression)"), "nameFilter");
+    QCommandLineOption addressOption(QStringList() << "a" << "address", QObject::tr("Bluetooth LE MAC address filter (Could use regular expression)"), "addressFilter");
+    QCommandLineOption ssidOption(QStringList() << "s" << "ssid", QObject::tr("SSID of Wi-Fi hotspot"), "ssid");
+    QCommandLineOption pskOption(QStringList() << "p" << "psk", QObject::tr("Pre-shared key of Wi-Fi hotspot"), "password");
 
     QCommandLineParser parser;
     parser.addOptions({ nameOption, addressOption, ssidOption, pskOption });
@@ -31,21 +31,25 @@ int main(int argc, char *argv[])
     parser.setSingleDashWordOptionMode(QCommandLineParser::SingleDashWordOptionMode::ParseAsCompactedShortOptions);
     parser.process(a);
 
-    if (parser.isSet(ssidOption)) {
+    const QString &ssid = parser.value(ssidOption);
+    if (!ssid.isEmpty()) {
         BlufiApplication *application = new BlufiApplication(&a);
 
-        application->setSsid(parser.value(ssidOption));
-
-        if (parser.isSet(pskOption)) {
-            application->setPsk(parser.value(pskOption));
+        application->setSsid(ssid);
+ 
+        const QString &psk = parser.value(pskOption);
+        if (!psk.isEmpty()) {
+            application->setPsk(psk);
         }
 
-        if (parser.isSet(nameOption)) {
-            application->setNameFilter(parser.value(nameOption));
+        const QString &name = parser.value(nameOption);
+        if (!name.isEmpty()) {
+            application->setNameFilter(name);
         }
 
-        if (parser.isSet(addressOption)) {
-            application->setAddressFilter(parser.value(addressOption));
+        const QString &address = parser.value(addressOption);
+        if (!address.isEmpty()) {
+            application->setAddressFilter(address);
         }
 
         QObject::connect(application, &BlufiApplication::finished, &QCoreApplication::quit);
