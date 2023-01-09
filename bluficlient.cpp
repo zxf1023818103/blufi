@@ -94,7 +94,7 @@ void BlufiClient::connectToDevice()
 
 void BlufiClient::send(const QByteArray &data)
 {
-    m_service->writeCharacteristic(m_p2eCharacteristic, QByteArray().append(data), QLowEnergyService::WriteWithoutResponse);
+    m_service->writeCharacteristic(m_p2eCharacteristic, QByteArray().append(data), QLowEnergyService::WriteWithResponse);
 }
 
 void BlufiClient::onServiceStateChanged(QLowEnergyService::ServiceState newState)
@@ -118,7 +118,6 @@ void BlufiClient::onServiceStateChanged(QLowEnergyService::ServiceState newState
 
         if (m_e2pCharacteristic.isValid() && m_p2eCharacteristic.isValid()) {
             m_service->writeDescriptor(m_e2pCharacteristic.clientCharacteristicConfiguration(), QLowEnergyCharacteristic::CCCDEnableNotification);
-            emit ready();
         }
         else {
             emit serviceNotFound();
@@ -129,7 +128,7 @@ void BlufiClient::onServiceStateChanged(QLowEnergyService::ServiceState newState
 void BlufiClient::onCharacteristicChanged(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
-             << info.uuid() << value;
+             << info.uuid() << value.toHex(' ');
 
     if (info == m_e2pCharacteristic) {
         emit dataReceived(value);
@@ -139,25 +138,33 @@ void BlufiClient::onCharacteristicChanged(const QLowEnergyCharacteristic &info, 
 void BlufiClient::onCharacteristicRead(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
-             << info.uuid() << value;
+             << info.uuid() << value.toHex(' ');
 }
 
 void BlufiClient::onCharacteristicWritten(const QLowEnergyCharacteristic &info, const QByteArray &value)
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
-             << info.uuid() << value;
+             << info.uuid() << value.toHex(' ');
+
+    if (info == m_e2pCharacteristic) {
+        emit dataReceived(value);
+    }
 }
 
 void BlufiClient::onDescriptorRead(const QLowEnergyDescriptor &info, const QByteArray &value)
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
-             << info.uuid() << value;
+             << info.uuid() << value.toHex(' ');
 }
 
 void BlufiClient::onDescriptorWritten(const QLowEnergyDescriptor &info, const QByteArray &value)
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
-             << info.uuid() << value;
+             << info.uuid() << value.toHex(' ');
+    
+    if (info == m_e2pCharacteristic.clientCharacteristicConfiguration() && value == QLowEnergyCharacteristic::CCCDEnableNotification) {
+        emit ready();
+    }
 }
 
 void BlufiClient::onServiceErrorOccurred(QLowEnergyService::ServiceError error)

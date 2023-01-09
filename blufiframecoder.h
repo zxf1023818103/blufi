@@ -153,6 +153,8 @@ public slots:
     void sendStaPassword(const QString &password, bool toPhone);
 
     void sendStaConnectionRequest(bool toPhone);
+
+    void sendWifiStatusQueryRequest();
 };
 
 #endif // BLUFIFRAMECODER_H

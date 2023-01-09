@@ -50,9 +50,8 @@ BlufiFrameCoder::BlufiFrameCoder(QObject *parent)
 void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhone, bool ack)
 {
     qsizetype remaining = data.size();
-    while (remaining > 0)
+    do
     {
-
         QByteArray packet;
         BlufiFrameHeader *header;
 
@@ -126,8 +125,8 @@ void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhon
             remaining -= header->dataSize;
         }
 
-        emit encodedDataGenerated(data, toPhone);
-    }
+        emit encodedDataGenerated(packet, toPhone);
+    } while (remaining > 0);
 }
 
 void BlufiFrameCoder::parseReceivedData(const QByteArray &data, bool toPhone)

@@ -7,5 +7,10 @@
         "vector": "cpp",
         "xstring": "cpp",
         "xutility": "cpp"
+    },
+    "C_Cpp.files.exclude": {
+        "**/.vscode": true,
+        "**/.vs": true,
+        "**/build": true
     }
 }

@@ -1,4 +1,6 @@
 #include "blufiapplication.h"
+#include "bluficlientframecoderadapter.h"
+#include <QTimer>
 
 BlufiApplication::BlufiApplication(QObject *parent)
     : QObject{parent}
@@ -20,27 +22,18 @@ void BlufiApplication::start()
 
 void BlufiApplication::onBlufiClientReady(BlufiClient *client)
 {
-    BlufiFrameCoder *coder = new BlufiFrameCoder(client);
+    BlufiClientFrameCoderAdapter *adapter = new BlufiClientFrameCoderAdapter(client);
+    connect(adapter->frameCoder(), &BlufiFrameCoder::dataFrameReceived, this, &BlufiApplication::onDataFrameReceived);
+    connect(adapter->frameCoder(), &BlufiFrameCoder::controlFrameReceived, this, &BlufiApplication::onControlFrameReceived);
 
-    connect(coder, &BlufiFrameCoder::encodedDataGenerated, this, [this, client](const QByteArray &data, bool toPhone) {
+    adapter->frameCoder()->sendStaSsid(m_ssid, false);
+    adapter->frameCoder()->sendStaPassword(m_psk, false);
+    adapter->frameCoder()->sendStaConnectionRequest(false);
 
-        qDebug() << client->controller()->remoteName() << client->controller()->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
-                << "send" << QByteArray().toHex();
-
-        client->send(data);
-    });
-    
-    connect(client, &BlufiClient::dataReceived, this, [coder](const QByteArray &data) {
-        coder->parseReceivedData(data, true);
-    });
-
-    connect(coder, &BlufiFrameCoder::dataFrameReceived, this, &BlufiApplication::onDataFrameReceived);
-
-    connect(coder, &BlufiFrameCoder::controlFrameReceived, this, &BlufiApplication::onControlFrameReceived);
-
-    coder->sendStaSsid(m_ssid, false);
-    coder->sendStaPassword(m_psk, false);
-    coder->sendStaConnectionRequest(false);
+    QTimer *timer = new QTimer(adapter->frameCoder());
+    connect(timer, &QTimer::timeout, adapter->frameCoder(), &BlufiFrameCoder::sendWifiStatusQueryRequest);
+    timer->setInterval(1000);
+    timer->start();
 }
 
 void BlufiApplication::onDataFrameReceived(BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone)
