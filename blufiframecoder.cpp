@@ -315,17 +315,22 @@ void BlufiFrameCoder::sendError(Errors error, bool toPhone)
     sendDataFrame(DATA_ERROR, data, toPhone, false);
 }
 
-void BlufiFrameCoder::sendStaSsid(const QString &ssid, bool toPhone)
+void BlufiFrameCoder::sendStaSsid(const QString &ssid)
 {
-    sendDataFrame(DATA_STA_SSID, ssid.toUtf8(), toPhone, true);
+    sendDataFrame(DATA_STA_SSID, ssid.toUtf8(), false, true);
 }
 
-void BlufiFrameCoder::sendStaPassword(const QString &password, bool toPhone)
+void BlufiFrameCoder::sendStaPassword(const QString &password)
 {
-    sendDataFrame(DATA_STA_PASSWORD, password.toUtf8(), toPhone, true);
+    sendDataFrame(DATA_STA_PASSWORD, password.toUtf8(), false, true);
 }
 
-void BlufiFrameCoder::sendStaConnectionRequest(bool toPhone)
+void BlufiFrameCoder::sendStaConnectionRequest()
 {
     sendControlFrame(CONTROL_STA_CONNECT, QByteArray(), false, true);
+}
+
+void BlufiFrameCoder::sendWifiStatusQueryRequest()
+{
+    sendControlFrame(CONTROL_STATUS_GET, QByteArray(), false, true);
 }

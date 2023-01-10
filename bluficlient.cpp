@@ -25,6 +25,8 @@ void BlufiClient::onConnected()
 void BlufiClient::onDisconnected()
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
+
+    deleteLater();
 }
 
 void BlufiClient::onConnectionUpdated(const QLowEnergyConnectionParameters &parameters)

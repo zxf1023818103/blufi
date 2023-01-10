@@ -23,27 +23,34 @@ void BlufiApplication::start()
 void BlufiApplication::onBlufiClientReady(BlufiClient *client)
 {
     BlufiClientFrameCoderAdapter *adapter = new BlufiClientFrameCoderAdapter(client);
-    connect(adapter->frameCoder(), &BlufiFrameCoder::dataFrameReceived, this, &BlufiApplication::onDataFrameReceived);
-    connect(adapter->frameCoder(), &BlufiFrameCoder::controlFrameReceived, this, &BlufiApplication::onControlFrameReceived);
+    connect(adapter, &BlufiClientFrameCoderAdapter::dataFrameReceived, this, &BlufiApplication::onDataFrameReceived);
+    connect(adapter, &BlufiClientFrameCoderAdapter::controlFrameReceived, this, &BlufiApplication::onControlFrameReceived);
 
-    adapter->frameCoder()->sendStaSsid(m_ssid, false);
-    adapter->frameCoder()->sendStaPassword(m_psk, false);
-    adapter->frameCoder()->sendStaConnectionRequest(false);
+    adapter->frameCoder()->sendStaSsid(m_ssid);
+    adapter->frameCoder()->sendStaPassword(m_psk);
+    adapter->frameCoder()->sendStaConnectionRequest();
 
-    QTimer *timer = new QTimer(adapter->frameCoder());
+    QTimer *timer = new QTimer(adapter);
     connect(timer, &QTimer::timeout, adapter->frameCoder(), &BlufiFrameCoder::sendWifiStatusQueryRequest);
+    connect(client->controller(), &QLowEnergyController::disconnected, timer, &QTimer::stop);
     timer->setInterval(1000);
     timer->start();
 }
 
-void BlufiApplication::onDataFrameReceived(BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone)
+void BlufiApplication::onDataFrameReceived(BlufiClient *client, BlufiFrameCoder *frameCoder, BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone)
 {
-    qDebug() << qobject_cast<BlufiClient*>(sender()->parent())->controller()->remoteName() << qobject_cast<BlufiClient*>(sender()->parent())->controller()->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__) << type << data;
+    qDebug() << client->controller()->remoteName() << client->controller()->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__) << type << data.toHex(' ');
 }
 
-void BlufiApplication::onControlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone)
+void BlufiApplication::onControlFrameReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone)
 {
-    qDebug() << qobject_cast<BlufiClient*>(sender()->parent())->controller()->remoteName() << qobject_cast<BlufiClient*>(sender()->parent())->controller()->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__) << type << data;
+    qDebug() << client->controller()->remoteName() << client->controller()->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__) << type << data.toHex(' ');
+
+    switch (type) {
+    case BlufiFrameCoder::DATA_STATUS:
+
+        break;
+    }
 }
 
 void BlufiApplication::onBlufiClientAllDestroyed()

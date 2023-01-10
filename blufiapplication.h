@@ -36,9 +36,9 @@ public slots:
 private slots:
     void onBlufiClientReady(BlufiClient *client);
 
-    void onDataFrameReceived(BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone);
+    void onDataFrameReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone);
 
-    void onControlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone);
+    void onControlFrameReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::ControlFrameTypes type, const QByteArray &data, bool toPhone);
 
     void onBlufiClientAllDestroyed();
 

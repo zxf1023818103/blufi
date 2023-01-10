@@ -19,6 +19,7 @@ public:
         FRAME_CONTROL = 0,
         FRAME_DATA,
     };
+    Q_ENUM(FrameTypes);
 
     enum ControlFrameTypes {
         CONTROL_ACK = 0,
@@ -33,6 +34,7 @@ public:
         CONTROL_WIFI_LIST_GET,
         CONTROL_FRAME_TYPE_END,
     };
+    Q_ENUM(ControlFrameTypes);
 
     enum DataFrameTypes {
         DATA_NEGOTIATION = 0,
@@ -60,6 +62,7 @@ public:
         DATA_RSSI_AT_CONNECTION_END,
         DATA_FRAME_TYPE_END,
     };
+    Q_ENUM(DataFrameTypes);
 
     enum Errors {
         ERR_SEQUENCE = 0,
@@ -76,6 +79,7 @@ public:
         ERR_WIFI_SCAN,
         ERR_END,
     };
+    Q_ENUM(Errors);
 
     enum SecurityModes {
         SEC_NONE = 0,
@@ -84,6 +88,7 @@ public:
         SEC_BOTH,
         SEC_MODE_END,
     };
+    Q_ENUM(SecurityModes);
 
     explicit BlufiFrameCoder(QObject *parent = nullptr);
 
@@ -148,11 +153,11 @@ public slots:
 
     void sendError(BlufiFrameCoder::Errors, bool toPhone);
 
-    void sendStaSsid(const QString &ssid, bool toPhone);
+    void sendStaSsid(const QString &ssid);
 
-    void sendStaPassword(const QString &password, bool toPhone);
+    void sendStaPassword(const QString &password);
 
-    void sendStaConnectionRequest(bool toPhone);
+    void sendStaConnectionRequest();
 
     void sendWifiStatusQueryRequest();
 };
