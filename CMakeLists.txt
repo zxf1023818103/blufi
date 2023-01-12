@@ -26,6 +26,7 @@ add_executable(blufi
   bluficlientframecoderadapter.h
   blufiapplication.cpp
   blufiapplication.h
+  cpp.hint
   ${TS_FILES}
 )
 target_link_libraries(blufi Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth)

@@ -22,6 +22,10 @@ private:
 
     BlufiScanner * m_scanner;
 
+    void parseDataFrame(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::DataFrameTypes type, const QByteArrayView& data, bool toPhone);
+
+    void parseControlFrame(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::ControlFrameTypes type, const QByteArrayView& data, bool toPhone);
+
 public slots:
     inline void setSsid(const QString &ssid) { m_ssid = ssid; }
 
