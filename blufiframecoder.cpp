@@ -2,6 +2,7 @@
 #include "bluficlient.h"
 #include <QByteArray>
 #include <QDebug>
+#include <QMetaEnum>
 
 extern "C"
 {
@@ -45,6 +46,9 @@ extern "C"
 BlufiFrameCoder::BlufiFrameCoder(QObject *parent)
     : QObject{parent}
 {
+    connect(this, &BlufiFrameCoder::dataFrameReceived, this, &BlufiFrameCoder::parseDataFrame);
+    connect(this, &BlufiFrameCoder::controlFrameReceived, this, &BlufiFrameCoder::parseControlFrame);
+    connect(this, &BlufiFrameCoder::negotiationDataReceived, this, &BlufiFrameCoder::onNegotiationDataReceived);
 }
 
 void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhone, bool ack)
@@ -111,7 +115,7 @@ void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhon
                 }
                 else
                 {
-                    sendError(ERR_ENCRYPT, toPhone);
+                    sendError(ERR_ENCRYPT, toPhone, m_sendErrorAckEnabled);
                 }
             }
         }
@@ -155,7 +159,7 @@ void BlufiFrameCoder::parseReceivedData(const QByteArray &data, bool toPhone)
                         parseDecryptedData(packet, toPhone);
                     }
                     else {
-                        sendError(ERR_DECRYPT, toPhone);
+                        sendError(ERR_DECRYPT, toPhone, m_sendErrorAckEnabled);
                     }
                 }
                 else {
@@ -163,7 +167,7 @@ void BlufiFrameCoder::parseReceivedData(const QByteArray &data, bool toPhone)
                 }
             }
             else {
-                sendError(ERR_SEQUENCE, toPhone);
+                sendError(ERR_SEQUENCE, toPhone, m_sendErrorAckEnabled);
             }
         }
         else {
@@ -179,32 +183,32 @@ void BlufiFrameCoder::dispatchFrame(quint8 frameType, quint8 frameSubType, const
 {
     if (frameType == FRAME_CONTROL)
     {
-        if (frameSubType < CONTROL_FRAME_TYPE_END)
+        if (QMetaEnum::fromType<ControlFrameTypes>().valueToKey(frameSubType) != nullptr)
         {
             emit controlFrameReceived(static_cast<ControlFrameTypes>(frameSubType), data, toPhone);
         }
         else
         {
             /// unknown control frame type
-            sendError(ERR_DATA_FORMAT, !toPhone);
+            sendError(ERR_DATA_FORMAT, !toPhone, m_sendErrorAckEnabled);
         }
     }
     else if (frameType == FRAME_DATA)
     {
-        if (frameSubType < DATA_FRAME_TYPE_END)
+        if (QMetaEnum::fromType<DataFrameTypes>().valueToKey(frameSubType) != nullptr)
         {
             emit dataFrameReceived(static_cast<DataFrameTypes>(frameSubType), data, toPhone);
         }
         else
         {
             /// unknown data frame type
-            sendError(ERR_DATA_FORMAT, !toPhone);
+            sendError(ERR_DATA_FORMAT, !toPhone, m_sendErrorAckEnabled);
         }
     }
     else
     {
         /// unknown frame type
-        sendError(ERR_DATA_FORMAT, !toPhone);
+        sendError(ERR_DATA_FORMAT, !toPhone, m_sendErrorAckEnabled);
     }
 }
 
@@ -230,7 +234,7 @@ void BlufiFrameCoder::parseDecryptedData(const QByteArray &packet, bool toPhone)
         else
         {
             checksumOk = false;
-            sendError(ERR_DATA_FORMAT, !toPhone);
+            sendError(ERR_DATA_FORMAT, !toPhone, m_sendErrorAckEnabled);
         }
     }
 
@@ -277,7 +281,246 @@ void BlufiFrameCoder::parseDecryptedData(const QByteArray &packet, bool toPhone)
     }
     else
     {
-        sendError(ERR_CHECKSUM, toPhone);
+        sendError(ERR_CHECKSUM, toPhone, m_sendErrorAckEnabled);
+    }
+}
+
+void BlufiFrameCoder::parseDataFrame(BlufiFrameCoder::DataFrameTypes type, const QByteArrayView& data, bool toPhone)
+{
+    switch (type) {
+        case DATA_NEGOTIATION: {
+            emit negotiationDataReceived(data, toPhone);
+            break;
+        }
+        case DATA_STA_BSSID: {
+            emit staBssidReceived(data, toPhone);
+            break;
+        }
+        case DATA_STA_SSID: {
+            emit staSsidReceived(data, toPhone);
+            break;
+        }
+        case DATA_STA_PASSWORD: {
+            emit staPasswordReceived(data, toPhone);
+            break;
+        }
+        case DATA_AP_SSID: {
+            emit apSsidReceived(data, toPhone);
+            break;
+        }
+        case DATA_AP_PASSWORD: {
+            emit apPasswordReceived(data, toPhone);
+            break;
+        }
+        case DATA_AP_MAX_CONNECTIONS: {
+            emit apMaxConnectionsReceived(data[0], toPhone);
+            break;
+        }
+        case DATA_AP_AUTH_MODE: {
+            if (QMetaEnum::fromType<WiFiAuthModes>().valueToKey(data[0]) != nullptr) {
+                emit apAuthModeReceived(static_cast<WiFiAuthModes>(data[0]), toPhone);
+            }
+            break;
+        }
+        case DATA_AP_CHANNELS: {
+            if (data[0] == data.size() - 1) {
+                QList<quint8> channels;
+                for (auto i = data.begin() + 1; i != data.end(); i++) {
+                    channels.append(*i);
+                }
+                emit apChannelsReceived(channels, toPhone);
+            }
+            break;
+        }
+        case DATA_USERNAME: {
+            emit usernameReceived(data, toPhone);
+            break;
+        }
+        case DATA_CA_CERT: {
+            emit caCertReceived(data, toPhone);
+            break;
+        }
+        case DATA_CLIENT_CERT: {
+            emit clientCertReceived(data, toPhone);
+            break;
+        }
+        case DATA_SERVER_CERT: {
+            emit serverCertReceived(data, toPhone);
+            break;
+        }
+        case DATA_CLIENT_KEY: {
+            emit clientKeyReceived(data, toPhone);
+            break;
+        }
+        case DATA_SERVER_KEY: {
+            emit serverKeyReceived(data, toPhone);
+            break;
+        }
+        case DATA_STATUS: {
+            if (data.size() >= 3) {
+                if (QMetaEnum::fromType<WiFiModes>().valueToKey(data[0]) != nullptr) {
+                    emit wifiModeReceived(static_cast<WiFiModes>(data[0]), toPhone);
+                }
+                if (QMetaEnum::fromType<ConnectionStatus>().valueToKey(data[1]) != nullptr) {
+                    emit connectionStatusReceived(static_cast<ConnectionStatus>(data[1]), toPhone);
+                }
+                emit apConnectionsReceived(data[2], toPhone);
+            
+                auto i = data.begin() + 3;
+                while (i + 2 < data.end()) {
+                    quint8 type = *i++;
+                    if (QMetaEnum::fromType<DataFrameTypes>().valueToKey(type) != nullptr) {
+                        DataFrameTypes frameType = static_cast<DataFrameTypes>(type);
+                        quint8 size = *i++;
+                        auto end = i += size;
+                        if (end <= data.end()) {
+                            auto begin = i;
+                            parseDataFrame(frameType, QByteArrayView(begin, end), toPhone);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        case DATA_VERSION: {
+            if (data.size() == 2) {
+                emit blufiVersionReceived(data[0], data[1], toPhone);
+            }
+            break;
+        }
+        case DATA_WIFI_LIST: {
+            
+            QList<QPair<QByteArray, qint8>> ssidRssiPairs;
+
+            auto i = data.begin();
+            while (i + 2 < data.end()) {
+                quint8 size = *i++;
+                qint8 rssi;
+                std::memcpy(reinterpret_cast<void*>(&rssi), reinterpret_cast<const void*>(i), sizeof rssi);
+
+                auto begin = i;
+                auto end = i + size - 1;
+                if (end < data.end()) {
+                    ssidRssiPairs += qMakePair(QByteArray().append(QByteArrayView(begin, end)), rssi);
+                }
+                else {
+                    break;
+                }
+            }
+
+            emit wifiListReceived(ssidRssiPairs, toPhone);
+
+            break;
+        }
+        case DATA_ERROR: {
+            if (QMetaEnum::fromType<Errors>().valueToKey(data[0]) != nullptr) {
+                emit errorReceived(static_cast<Errors>(data[0]), toPhone);
+            }
+            break;
+        }
+        case DATA_CUSTOM: {
+            emit customDataReceived(data, toPhone);
+            break;
+        }
+        case DATA_MAX_RECONNECT_TIME: {
+            emit maxConnectionRetriesReceived(data[0], toPhone);
+            break;
+        }
+        case DATA_CONNECTION_END_REASON: {
+            if (QMetaEnum::fromType<WiFiFailureReason>().valueToKey(data[0]) != nullptr) {
+                emit connectionFailureReasonReceived(static_cast<WiFiFailureReason>(data[0]), toPhone);
+            }
+            break;
+        }
+        case DATA_RSSI_AT_CONNECTION_END: {
+            qint8 rssi;
+            std::memcpy(reinterpret_cast<void*>(&rssi), reinterpret_cast<const void*>(data.constData()), sizeof rssi);
+            emit connectionFailureRssiReceived(rssi, toPhone);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void BlufiFrameCoder::parseControlFrame(BlufiFrameCoder::ControlFrameTypes type, const QByteArrayView& data, bool toPhone)
+{
+    switch (type) {
+        case CONTROL_ACK: {
+            if (!data.isEmpty()) {
+                emit ackReceived(data[0], toPhone);
+            }
+            break;
+        }
+        case CONTROL_SECURITY_MODE_SET: {
+            if (!data.isEmpty()) {
+                quint8 controlFrameSecurityModeValue = (data[0] & 0xf0) >> 4;
+                if (QMetaEnum::fromType<SecurityModes>().valueToKey(controlFrameSecurityModeValue) != nullptr) {
+                    emit controlFrameSecurityModeReceived(static_cast<SecurityModes>(controlFrameSecurityModeValue), toPhone);
+                }
+
+                quint8 dataFrameSecurityModeValue = data[0] & 0x0f;
+                if (QMetaEnum::fromType<SecurityModes>().valueToKey(dataFrameSecurityModeValue) != nullptr) {
+                    emit dataFrameSecurityModeReceived(static_cast<SecurityModes>(dataFrameSecurityModeValue), toPhone);
+                }
+            }
+            break;
+        }
+        case CONTROL_OPMODE_SET: {
+            if (!data.isEmpty()) {
+                if (QMetaEnum::fromType<WiFiModes>().valueToKey(data[0]) != nullptr) {
+                    emit wifiModeReceived(static_cast<WiFiModes>(data[0]), toPhone);
+                }
+            }
+            break;
+        }
+        case CONTROL_STA_CONNECT: {
+            emit staConnectRequestReceived(toPhone);
+            break;
+        }
+        case CONTROL_STA_DISCONNECT: {
+            emit staDisonnectRequestReceived(toPhone);
+            break;
+        }
+        case CONTROL_STATUS_GET: {
+            emit wifiStatusGetRequestReceived(toPhone);
+            break;
+        }
+        case CONTROL_AP_DISCONNECT: {
+            if (data.size() % 6 == 0) {
+                for (auto i = data.begin(); i < data.end(); i += 6) {
+                    emit apClientDisconnectRequestReceived(QByteArrayView(i, i + 6), toPhone);
+                }
+            }
+            break;
+        }
+        case CONTROL_VERSION_GET: {
+            emit blufiVersionRequestReceived(toPhone);
+            break;
+        }
+        case CONTROL_GATT_DISCONNECT: {
+            emit gattDisconnectRequestReceived(toPhone);
+            break;
+        }
+        case CONTROL_WIFI_LIST_GET: {
+            emit wifiListGetRequestReceived(toPhone);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void BlufiFrameCoder::onNegotiationDataReceived(const QByteArrayView& data, bool toPhone)
+{
+    if (m_negotiateDataHandler) {
+        sendNegotiationData(m_negotiateDataHandler(data, toPhone), toPhone, m_sendNegotiationDataAckEnable);
     }
 }
 
@@ -306,31 +549,41 @@ void BlufiFrameCoder::sendAck(quint8 sequenceNo, bool toPhone)
     sendControlFrame(CONTROL_ACK, data, toPhone, false);
 }
 
-void BlufiFrameCoder::sendError(Errors error, bool toPhone)
+void BlufiFrameCoder::sendError(Errors error, bool toPhone, bool ack)
 {
     qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << error;
 
     QByteArray data;
     data.append(static_cast<quint8>(error));
-    sendDataFrame(DATA_ERROR, data, toPhone, false);
+    sendDataFrame(DATA_ERROR, data, toPhone, ack);
 }
 
-void BlufiFrameCoder::sendStaSsid(const QString &ssid)
+void BlufiFrameCoder::sendStaSsid(const QString &ssid, bool ack)
 {
-    sendDataFrame(DATA_STA_SSID, ssid.toUtf8(), false, true);
+    sendDataFrame(DATA_STA_SSID, ssid.toUtf8(), false, ack);
 }
 
-void BlufiFrameCoder::sendStaPassword(const QString &password)
+void BlufiFrameCoder::sendStaPassword(const QString &password, bool ack)
 {
-    sendDataFrame(DATA_STA_PASSWORD, password.toUtf8(), false, true);
+    sendDataFrame(DATA_STA_PASSWORD, password.toUtf8(), false, ack);
 }
 
-void BlufiFrameCoder::sendStaConnectionRequest()
+void BlufiFrameCoder::sendStaConnectionRequest(bool ack)
 {
-    sendControlFrame(CONTROL_STA_CONNECT, QByteArray(), false, true);
+    sendControlFrame(CONTROL_STA_CONNECT, QByteArray(), false, ack);
 }
 
-void BlufiFrameCoder::sendWifiStatusQueryRequest()
+void BlufiFrameCoder::sendWifiStatusQueryRequest(bool ack)
 {
-    sendControlFrame(CONTROL_STATUS_GET, QByteArray(), false, true);
+    sendControlFrame(CONTROL_STATUS_GET, QByteArray(), false, ack);
+}
+
+void BlufiFrameCoder::sendNegotiationData(const QByteArray& data, bool toPhone, bool ack)
+{
+    sendDataFrame(DATA_NEGOTIATION, data, toPhone, ack);
+}
+
+void BlufiFrameCoder::sendGattDisconnectRequest(bool ack)
+{
+    sendControlFrame(CONTROL_GATT_DISCONNECT, QByteArray(), false);
 }

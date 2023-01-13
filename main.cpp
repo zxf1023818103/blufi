@@ -52,7 +52,9 @@ int main(int argc, char *argv[])
             application->setAddressFilter(address);
         }
 
-        QObject::connect(application, &BlufiApplication::finished, &QCoreApplication::quit);
+        QObject::connect(application, &BlufiApplication::destroyed, []() {
+            QCoreApplication::exit();
+        });
 
         QTimer::singleShot(0, application, &BlufiApplication::start);
     }

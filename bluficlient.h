@@ -66,8 +66,6 @@ private slots:
 
     void onServiceErrorOccurred(QLowEnergyService::ServiceError error);
 
-    void onDestroyed(QObject *obj);
-
 public slots:
     void connectToDevice();
 

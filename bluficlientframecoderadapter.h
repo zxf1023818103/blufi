@@ -29,10 +29,14 @@ private slots:
 
     void onFrameCoderControlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArray& data, bool toPhone);
 
+    void onConnectionStatusReceived(BlufiFrameCoder::ConnectionStatus connectionStatus, bool toPhone);
+
 signals:
     void dataFrameReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::DataFrameTypes type, const QByteArray& data, bool toPhone);
 
     void controlFrameReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::ControlFrameTypes type, const QByteArray& data, bool toPhone);
+
+    void connectionStatusReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::ConnectionStatus connectionStatus, bool toPhone);
 };
 
 #endif // BLUFICLIENTFRAMECODERADAPTER_H

@@ -8,6 +8,7 @@ BlufiClientFrameCoderAdapter::BlufiClientFrameCoderAdapter(BlufiClient *client)
     connect(m_frameCoder, &BlufiFrameCoder::encodedDataGenerated, this, &BlufiClientFrameCoderAdapter::onDataSent);
     connect(m_frameCoder, &BlufiFrameCoder::dataFrameReceived, this, &BlufiClientFrameCoderAdapter::onFrameCoderDataFrameReceived);
     connect(m_frameCoder, &BlufiFrameCoder::controlFrameReceived, this, &BlufiClientFrameCoderAdapter::onFrameCoderControlFrameReceived);
+    connect(m_frameCoder, &BlufiFrameCoder::connectionStatusReceived, this, &BlufiClientFrameCoderAdapter::onConnectionStatusReceived);
     connect(m_client, &BlufiClient::dataReceived, this, &BlufiClientFrameCoderAdapter::onDataReceived);
 }
 
@@ -35,4 +36,9 @@ void BlufiClientFrameCoderAdapter::onFrameCoderDataFrameReceived(BlufiFrameCoder
 void BlufiClientFrameCoderAdapter::onFrameCoderControlFrameReceived(BlufiFrameCoder::ControlFrameTypes type, const QByteArray& data, bool toPhone)
 {
     emit controlFrameReceived(m_client, m_frameCoder, type, data, toPhone);
+}
+
+void BlufiClientFrameCoderAdapter::onConnectionStatusReceived(BlufiFrameCoder::ConnectionStatus connectionStatus, bool toPhone)
+{
+    emit connectionStatusReceived(m_client, m_frameCoder, connectionStatus, toPhone);
 }

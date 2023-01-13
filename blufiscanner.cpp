@@ -102,6 +102,8 @@ void BlufiScanner::onBlufiClientDestroyed()
 {
     m_globalCount--;
 
+    qDebug() << (QString(metaObject()->className()) + "::" + __func__) << m_globalCount;
+
     if (!m_discoveryAgent->isActive() && m_globalCount == 0) {
         emit clientAllDestroyed();
     }

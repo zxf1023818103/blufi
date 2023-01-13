@@ -12,7 +12,7 @@ BlufiClient::BlufiClient(const QBluetoothDeviceInfo& info, QObject *parent)
     connect(m_controller, &QLowEnergyController::errorOccurred, this, &BlufiClient::onControllerErrorOccurred);
     connect(m_controller, &QLowEnergyController::mtuChanged, this, &BlufiClient::onMtuChanged);
     connect(m_controller, &QLowEnergyController::stateChanged, this, &BlufiClient::onControllerStateChanged);
-    connect(this, &BlufiClient::destroyed, this, &BlufiClient::onDestroyed);
+    // connect(this, &BlufiClient::destroyed, this, &BlufiClient::onDestroyed);
 }
 
 void BlufiClient::onConnected()
@@ -25,8 +25,6 @@ void BlufiClient::onConnected()
 void BlufiClient::onDisconnected()
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
-
-    deleteLater();
 }
 
 void BlufiClient::onConnectionUpdated(const QLowEnergyConnectionParameters &parameters)
@@ -87,6 +85,10 @@ void BlufiClient::onControllerStateChanged(QLowEnergyController::ControllerState
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << state;
+    
+    if (state == QLowEnergyController::UnconnectedState) {
+        deleteLater();
+    }
 }
 
 void BlufiClient::connectToDevice()
@@ -173,9 +175,4 @@ void BlufiClient::onServiceErrorOccurred(QLowEnergyService::ServiceError error)
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__)
              << error;
-}
-
-void BlufiClient::onDestroyed(QObject *obj)
-{
-    qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
 }
