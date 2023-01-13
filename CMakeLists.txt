@@ -25,8 +25,8 @@ add_executable(blufi
   blufiframecoder.h
   bluficlientframecoderadapter.cpp
   bluficlientframecoderadapter.h
-  blufiapplication.cpp
-  blufiapplication.h
+  "bluficlientapplication.cpp"
+  "bluficlientapplication.h"
   cpp.hint
   ${TS_FILES}
 )

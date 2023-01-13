@@ -1,15 +1,15 @@
-#ifndef BLUFIAPPLICATION_H
-#define BLUFIAPPLICATION_H
+#ifndef BLUFICLIENTAPPLICATION_H
+#define BLUFICLIENTAPPLICATION_H
 
 #include <QObject>
 #include "blufiscanner.h"
 #include "blufiframecoder.h"
 
-class BlufiApplication : public QObject
+class BlufiClientApplication : public QObject
 {
     Q_OBJECT
 public:
-    explicit BlufiApplication(QObject *parent = nullptr);
+    explicit BlufiClientApplication(QObject *parent = nullptr);
 
 private:
     QString m_ssid;
@@ -45,4 +45,4 @@ private slots:
     void onConnectionStatusReceived(BlufiClient* client, BlufiFrameCoder* frameCoder, BlufiFrameCoder::ConnectionStatus connectionStatus, bool toPhone);
 };
 
-#endif // BLUFIAPPLICATION_H
+#endif // BLUFICLIENTAPPLICATION_H

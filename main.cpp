@@ -3,7 +3,7 @@
 #include <QTranslator>
 #include <QTimer>
 #include <QCommandLineParser>
-#include "blufiapplication.h"
+#include "bluficlientapplication.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
     const QString &ssid = parser.value(ssidOption);
     if (!ssid.isEmpty()) {
-        BlufiApplication *application = new BlufiApplication(&a);
+        BlufiClientApplication *application = new BlufiClientApplication(&a);
 
         application->setSsid(ssid);
  
@@ -51,11 +51,11 @@ int main(int argc, char *argv[])
             application->setAddressFilter(address);
         }
 
-        QObject::connect(application, &BlufiApplication::destroyed, []() {
+        QObject::connect(application, &BlufiClientApplication::destroyed, []() {
             QCoreApplication::exit();
         });
 
-        QTimer::singleShot(0, application, &BlufiApplication::start);
+        QTimer::singleShot(0, application, &BlufiClientApplication::start);
     }
     else {
         parser.showHelp();
