@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
     parser.addOptions({ nameOption, addressOption, ssidOption, pskOption });
     parser.setApplicationDescription(QObject::tr("Configure Wi-Fi network for ESP32/ESP8266 device via Bluetooth channel"));
     parser.addHelpOption();
-    parser.setSingleDashWordOptionMode(QCommandLineParser::SingleDashWordOptionMode::ParseAsCompactedShortOptions);
     parser.process(a);
 
     const QString &ssid = parser.value(ssidOption);
