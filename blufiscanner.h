@@ -35,9 +35,9 @@ private:
 
     QBluetoothDeviceDiscoveryAgent *m_discoveryAgent = nullptr;
 
-    QRegularExpression *m_nameFilter = nullptr;
+    QRegularExpression m_nameFilter;
 
-    QRegularExpression *m_addressFilter = nullptr;
+    QRegularExpression m_addressFilter;
 
 public slots:
     void start();

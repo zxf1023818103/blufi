@@ -11,18 +11,6 @@ BlufiScanner::BlufiScanner(QObject *parent)
 
 void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
 {
-    if (m_nameFilter) {
-        if (!m_nameFilter->match(info.name()).hasMatch()) {
-            return;
-        }
-    }
-
-    if (m_addressFilter) {
-        if (!m_addressFilter->match(info.address().toString()).hasMatch()) {
-            return;
-        }
-    }
-
     bool blufiServiceFound = false;
 
     auto serviceUuids = info.serviceUuids();
@@ -42,6 +30,9 @@ void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
         connect(client, &BlufiClient::ready, this, &BlufiScanner::onBlufiClientReady);
         connect(client, &BlufiClient::destroyed, this, &BlufiScanner::onBlufiClientDestroyed);
         
+        client->setAddressFilter(m_addressFilter);
+        client->setNameFilter(m_nameFilter);
+
         client->connectToDevice();
     }
 }
@@ -76,25 +67,15 @@ void BlufiScanner::start()
 
 void BlufiScanner::setNameFilter(const QString &nameFilter)
 {
-    if (m_nameFilter != nullptr) {
-        delete m_nameFilter;
-        m_nameFilter = nullptr;
-    }
-
     if (!nameFilter.isEmpty()) {
-        m_nameFilter = new QRegularExpression(nameFilter);
+        m_nameFilter = QRegularExpression(nameFilter);
     }
 }
 
 void BlufiScanner::setAddressFilter(const QString &addressFilter)
 {
-    if (m_addressFilter != nullptr) {
-        delete m_addressFilter;
-        m_addressFilter = nullptr;
-    }
-
     if (!addressFilter.isEmpty()) {
-        m_addressFilter = new QRegularExpression(addressFilter);
+        m_addressFilter = QRegularExpression(addressFilter, QRegularExpression::CaseInsensitiveOption);
     }
 }
 

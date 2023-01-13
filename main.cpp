@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    QCommandLineOption nameOption(QStringList() << "n" << "name", QObject::tr("Blufi device name filter (Could use regular expression)"), "nameFilter");
-    QCommandLineOption addressOption(QStringList() << "a" << "address", QObject::tr("Bluetooth LE MAC address filter (Could use regular expression)"), "addressFilter");
+    QCommandLineOption nameOption(QStringList() << "n" << "name", QObject::tr("Blufi device name regular expression filter (Case sensitive)"), "nameFilter");
+    QCommandLineOption addressOption(QStringList() << "a" << "address", QObject::tr("Bluetooth LE public address regular expression filter (Case insensitive)", "address"), "addressFilter");
     QCommandLineOption ssidOption(QStringList() << "s" << "ssid", QObject::tr("SSID of Wi-Fi hotspot"), "ssid");
     QCommandLineOption pskOption(QStringList() << "p" << "psk", QObject::tr("Pre-shared key of Wi-Fi hotspot"), "password");
 

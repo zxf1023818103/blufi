@@ -12,14 +12,28 @@ BlufiClient::BlufiClient(const QBluetoothDeviceInfo& info, QObject *parent)
     connect(m_controller, &QLowEnergyController::errorOccurred, this, &BlufiClient::onControllerErrorOccurred);
     connect(m_controller, &QLowEnergyController::mtuChanged, this, &BlufiClient::onMtuChanged);
     connect(m_controller, &QLowEnergyController::stateChanged, this, &BlufiClient::onControllerStateChanged);
-    // connect(this, &BlufiClient::destroyed, this, &BlufiClient::onDestroyed);
 }
 
 void BlufiClient::onConnected()
 {
     qDebug() << m_controller->remoteName() << m_controller->remoteAddress() << (QString(metaObject()->className()) + "::" + __func__);
 
-    m_controller->discoverServices();
+    bool nameFilterMatched = true;
+    if (m_nameFilter.isValid()) {
+        nameFilterMatched = m_nameFilter.match(m_controller->remoteName()).hasMatch();
+    }
+
+    bool addressFilterMatched = true;
+    if (m_addressFilter.isValid()) {
+        addressFilterMatched = m_addressFilter.match(m_controller->remoteAddress().toString()).hasMatch();
+    }
+
+    if (nameFilterMatched && addressFilterMatched) {
+        m_controller->discoverServices();
+    }
+    else {
+        deleteLater();
+    }
 }
 
 void BlufiClient::onDisconnected()

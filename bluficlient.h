@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QLowEnergyController>
+#include <QRegularExpression>
 
 class BlufiClient : public QObject
 {
@@ -19,6 +20,10 @@ public:
 
     inline QLowEnergyController* controller() { return m_controller; }
 
+    inline void setNameFilter(const QRegularExpression& nameFilter) { m_nameFilter = nameFilter; }
+
+    inline void setAddressFilter(const QRegularExpression& addressFilter) { m_addressFilter = addressFilter; }
+
 private:
     QLowEnergyController *m_controller = nullptr;
 
@@ -27,6 +32,10 @@ private:
     QLowEnergyCharacteristic m_p2eCharacteristic;
 
     QLowEnergyCharacteristic m_e2pCharacteristic;
+
+    QRegularExpression m_nameFilter;
+
+    QRegularExpression m_addressFilter;
 
 signals:
     void ready();
