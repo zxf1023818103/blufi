@@ -1,4 +1,5 @@
 #include "blufiscanner.h"
+#include "blufiframecoder.h"
 
 BlufiScanner::BlufiScanner(QObject *parent)
     : QObject{parent}
@@ -17,7 +18,7 @@ void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
     for (auto i = serviceUuids.constBegin(); i != serviceUuids.constEnd(); i++) {
         bool ok;
         quint16 uuid = i->toUInt16(&ok);
-        if (ok && uuid == BlufiClient::BLUFI_SERVICE_UUID) {
+        if (ok && uuid == BlufiFrameCoder::BLUFI_SERVICE_UUID) {
             blufiServiceFound = true;
             break;
         }

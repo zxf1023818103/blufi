@@ -1,11 +1,11 @@
-# ����
+# 概览
 
-ͨ�� Blufi Э������ ESP32/ESP8266 �豸�����硣
+通过 Blufi 协议配置 ESP32/ESP8266 设备的网络。
 
-# ʹ��
+# 命令行参数说明
 
 ```plaintext
-Usage: C:\Users\zxf10\Desktop\blufi\out\build\x64-Debug\blufi.exe [options]
+Usage: bluficlient.exe [options]
 Configure Wi-Fi network for ESP32/ESP8266 device via Bluetooth channel
 
 Options:
@@ -19,10 +19,12 @@ Options:
   --help-all                     Displays help including Qt specific options.
 ```
 
-# ʾ��
+# 示例
+
+使用时需要启用电脑的蓝牙功能。假设配网设备名为 `BLUFI_DEVICE` ，Wi-Fi热点名称为 `Zeng_2.4G` ，密码为 `123456789` ，命令行执行对设备进行配网：
 
 ```shell
-$ ./blufi -n BLUFI_DEVICE -s Zeng_2.4G -p 123456789
+bluficlient.exe -n BLUFI_DEVICE -s Zeng_2.4G -p 123456789
 ```
 
 ```plaintext
@@ -59,8 +61,8 @@ $ ./blufi -n BLUFI_DEVICE -s Zeng_2.4G -p 123456789
 "BlufiClientApplication::onBlufiClientAllDestroyed"
 ```
 
-# �����ƻ�
+# 后续计划
 
-- [ ] ֧�ּ���Э��
-- [ ] ʵ�ַ���ˣ�Ϊ Linux �豸�� macOS �豸�ṩ��������
-- [ ] ����
+- [ ] 支持加密协商
+- [ ] 实现服务端，为 Linux 设备和 macOS 设备提供配网服务
+- [ ] 汉化

@@ -1,4 +1,5 @@
 #include "bluficlient.h"
+#include "blufiframecoder.h"
 
 BlufiClient::BlufiClient(const QBluetoothDeviceInfo& info, QObject *parent)
     : QObject{parent}
@@ -70,7 +71,7 @@ void BlufiClient::onServiceDiscovered(const QBluetoothUuid &newService)
     if (m_service == nullptr) {
         bool ok;
         quint16 uuid = newService.toUInt16(&ok);
-        if (ok && uuid == BLUFI_SERVICE_UUID) {
+        if (ok && uuid == BlufiFrameCoder::BLUFI_SERVICE_UUID) {
             m_service = m_controller->createServiceObject(newService, this);
             connect(m_service, &QLowEnergyService::stateChanged, this, &BlufiClient::onServiceStateChanged);
             connect(m_service, &QLowEnergyService::characteristicChanged, this, &BlufiClient::onCharacteristicChanged);
@@ -126,10 +127,10 @@ void BlufiClient::onServiceStateChanged(QLowEnergyService::ServiceState newState
 
             bool ok;
             quint16 uuid = i->uuid().toUInt16(&ok);
-            if (uuid == BLUFI_E2P_UUID) {
+            if (uuid == BlufiFrameCoder::BLUFI_E2P_UUID) {
                 m_e2pCharacteristic = *i;
             }
-            else if (uuid == BLUFI_P2E_UUID) {
+            else if (uuid == BlufiFrameCoder::BLUFI_P2E_UUID) {
                 m_p2eCharacteristic = *i;
             }
         }

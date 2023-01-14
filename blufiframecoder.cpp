@@ -145,7 +145,6 @@ void BlufiFrameCoder::parseReceivedData(const QByteArray &data, bool toPhone)
             {
                 m_receiveSequenceNo++;
 
-                bool decryptOk = true;
                 if (header->encrypted && m_cryptHandler) {
                     const QByteArrayView &dataToBeDecrypted = QByteArrayView(data.constData() + Q_OFFSETOF(BlufiFrameHeader, data), static_cast<qsizetype>(header->dataSize));
                     const QByteArray &decryptedData = m_cryptHandler(header->sequenceNo, dataToBeDecrypted, true);

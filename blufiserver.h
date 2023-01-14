@@ -1,42 +1,19 @@
-#ifndef BLUFICLIENT_H
-#define BLUFICLIENT_H
+#ifndef BLUFISERVER_H
+#define BLUFISERVER_H
 
 #include <QObject>
 #include <QLowEnergyController>
-#include <QRegularExpression>
 
-class BlufiClient : public QObject
+class BlufiServer : public QObject
 {
     Q_OBJECT
-    
 public:
-    explicit BlufiClient(const QBluetoothDeviceInfo& info, QObject *parent = nullptr);
-
-    inline QLowEnergyController* controller() { return m_controller; }
-
-    inline void setNameFilter(const QRegularExpression& nameFilter) { m_nameFilter = nameFilter; }
-
-    inline void setAddressFilter(const QRegularExpression& addressFilter) { m_addressFilter = addressFilter; }
+    explicit BlufiServer(QObject *parent = nullptr);
 
 private:
-    QLowEnergyController *m_controller = nullptr;
+    QLowEnergyController *m_controller;
 
-    QLowEnergyService *m_service = nullptr;
-
-    QLowEnergyCharacteristic m_p2eCharacteristic;
-
-    QLowEnergyCharacteristic m_e2pCharacteristic;
-
-    QRegularExpression m_nameFilter;
-
-    QRegularExpression m_addressFilter;
-
-signals:
-    void ready();
-
-    void serviceNotFound();
-
-    void dataReceived(const QByteArray& data);
+    QLowEnergyService *m_service;
 
 private slots:
     void onConnected();
@@ -68,11 +45,6 @@ private slots:
     void onDescriptorWritten(const QLowEnergyDescriptor &info, const QByteArray &value);
 
     void onServiceErrorOccurred(QLowEnergyService::ServiceError error);
-
-public slots:
-    void connectToDevice();
-
-    void send(const QByteArray &data);
 };
 
-#endif // BLUFICLIENT_H
+#endif // BLUFISERVER_H

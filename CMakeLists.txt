@@ -15,22 +15,39 @@ find_package(OpenSSL REQUIRED COMPONENTS Crypto)
 
 set(TS_FILES blufi_zh_CN.ts)
 
-add_executable(blufi
-  main.cpp
+add_library(blufiframecoder
+    blufiframecoder.cpp
+    blufiframecoder.h
+)
+target_link_libraries(blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth)
+
+add_executable(bluficlient
+  bluficlientmain.cpp
   blufiscanner.cpp
   blufiscanner.h
   bluficlient.cpp
   bluficlient.h
-  blufiframecoder.cpp
-  blufiframecoder.h
   bluficlientframecoderadapter.cpp
   bluficlientframecoderadapter.h
-  "bluficlientapplication.cpp"
-  "bluficlientapplication.h"
+  bluficlientapplication.cpp
+  bluficlientapplication.h
   cpp.hint
   ${TS_FILES}
 )
-target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
+target_link_libraries(bluficlient blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
+
+add_executable(blufiserver
+  blufiservermain.cpp
+  blufiserver.cpp
+  blufiserver.h
+  blufiserverframecoderadapter.cpp
+  blufiserverframecoderadapter.h
+  blufiserverapplication.cpp
+  blufiserverapplication.h
+  cpp.hint
+  ${TS_FILES}
+)
+target_link_libraries(blufiserver blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
 
 if(COMMAND qt_create_translation)
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
@@ -38,5 +55,8 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS bluficlient
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+install(TARGETS blufiserver
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

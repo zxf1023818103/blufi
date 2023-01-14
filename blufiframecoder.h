@@ -15,6 +15,12 @@ class BlufiFrameCoder : public QObject
     Q_OBJECT
 public:
 
+    static const quint16 BLUFI_SERVICE_UUID = 0xFFFF;
+
+    static const quint16 BLUFI_P2E_UUID = 0xFF01;
+
+    static const quint16 BLUFI_E2P_UUID = 0xFF02;
+
     enum FrameTypes {
         FRAME_CONTROL = 0,
         FRAME_DATA,
