@@ -29,7 +29,9 @@ private slots:
     void onBlufiClientDestroyed();
 
 private:
-    bool m_deepScan = false;
+    bool m_deepScanEnabled = false;
+
+    bool m_stopDiscoveryAtClientReadyEnabled = false;
 
     QAtomicInt m_globalCount;
 
@@ -46,9 +48,11 @@ public slots:
 
     void setAddressFilter(const QString &addressFilter);
 
-    inline void enableDeepScan(bool deepScan) { m_deepScan = deepScan; }
+    inline void enableDeepScan(bool deepScanEnabled) { m_deepScanEnabled = deepScanEnabled; }
 
-    inline bool isDeepScan() { return m_deepScan; }
+    inline void enableStopDiscoveryAtClientReady(bool stopDiscoveryAtClientReadyEnabled) { m_stopDiscoveryAtClientReadyEnabled = m_stopDiscoveryAtClientReadyEnabled; }
+
+    inline bool deepScanEnabled() { return m_deepScanEnabled; }
 };
 
 #endif // BLUFISCANNER_H

@@ -2,6 +2,7 @@
 #define BLUFISERVERAPPLICATION_H
 
 #include <QObject>
+#include "blufiserver.h"
 
 class BlufiServerApplication : public QObject
 {
@@ -9,8 +10,14 @@ class BlufiServerApplication : public QObject
 public:
     explicit BlufiServerApplication(QObject *parent = nullptr);
 
+private:
+    BlufiServer *m_server;
+
 public slots:
     void start();
+
+private slots:
+    void onBlufiServerDestroyed();
 };
 
 #endif // BLUFISERVERAPPLICATION_H

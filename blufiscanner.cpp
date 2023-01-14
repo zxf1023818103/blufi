@@ -24,7 +24,7 @@ void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
         }
     }
 
-    if (blufiServiceFound || m_deepScan) {
+    if (blufiServiceFound || m_deepScanEnabled) {
         BlufiClient *client = new BlufiClient(info, this);
         m_globalCount++;
 
@@ -41,6 +41,8 @@ void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
 void BlufiScanner::onBlufiClientReady()
 {
     qDebug() << (QString(metaObject()->className()) + "::" + __func__);
+
+    m_discoveryAgent->stop();
 
     emit blufiClientReady(qobject_cast<BlufiClient*>(sender()));
 }

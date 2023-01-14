@@ -10,6 +10,8 @@ BlufiClientApplication::BlufiClientApplication(QObject *parent)
     m_scanner->setAddressFilter(m_addressFilter);
     m_scanner->setNameFilter(m_nameFilter);
 
+    m_scanner->enableStopDiscoveryAtClientReady(!m_addressFilter.isEmpty() || !m_nameFilter.isEmpty());
+
     connect(m_scanner, &BlufiScanner::blufiClientReady, this, &BlufiClientApplication::onBlufiClientReady);
     connect(m_scanner, &BlufiScanner::clientAllDestroyed, this, &BlufiClientApplication::onBlufiClientAllDestroyed);
 }

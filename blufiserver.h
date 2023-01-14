@@ -10,10 +10,14 @@ class BlufiServer : public QObject
 public:
     explicit BlufiServer(QObject *parent = nullptr);
 
+    inline void setName(const QString &name) { m_name = name; }
+
 private:
     QLowEnergyController *m_controller;
 
     QLowEnergyService *m_service;
+
+    QString m_name;
 
 private slots:
     void onConnected();
@@ -45,6 +49,11 @@ private slots:
     void onDescriptorWritten(const QLowEnergyDescriptor &info, const QByteArray &value);
 
     void onServiceErrorOccurred(QLowEnergyService::ServiceError error);
+
+public slots:
+    void start();
+
+    void stop();
 };
 
 #endif // BLUFISERVER_H
