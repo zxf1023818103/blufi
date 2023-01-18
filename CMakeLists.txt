@@ -55,8 +55,4 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-install(TARGETS bluficlient
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-install(TARGETS blufiserver
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS bluficlient blufiserver)

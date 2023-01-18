@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "blufi",
+            "name": "bluficlient",
             "externalConsole": false,
-            "args": ["-s", "TEST", "-p", "12345678"],
+            "args": ["-s", "Zeng_2.4G", "-p", "123456789"],
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/build/Debug/blufi.exe",
+            "program": "${workspaceRoot}/build/bluficlient",
             "cwd": "${workspaceRoot}"
         }
     ]
