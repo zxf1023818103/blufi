@@ -30,9 +30,17 @@ void BlufiClientApplication::onBlufiClientReady(BlufiClient *client)
     connect(adapter, &BlufiClientFrameCoderAdapter::controlFrameReceived, this, &BlufiClientApplication::onControlFrameReceived);
     connect(adapter, &BlufiClientFrameCoderAdapter::connectionStatusReceived, this, &BlufiClientApplication::onConnectionStatusReceived);
 
-    adapter->frameCoder()->sendStaSsid(m_ssid);
-    adapter->frameCoder()->sendStaPassword(m_psk);
-    adapter->frameCoder()->sendStaConnectionRequest();
+    BlufiFrameCoder *coder = adapter->frameCoder();
+    coder->sendStaSsid(m_ssid);
+    coder->sendStaPassword(m_psk);
+    coder->sendStaConnectionRequest();
+
+    QTimer *timer = new QTimer(adapter->frameCoder());
+    connect(timer, &QTimer::timeout, coder, [coder]() {
+        coder->sendWifiStatusQueryRequest();
+    });
+    timer->setInterval(1000);
+    timer->start();
 }
 
 void BlufiClientApplication::onDataFrameReceived(BlufiClient *client, BlufiFrameCoder *frameCoder, BlufiFrameCoder::DataFrameTypes type, const QByteArray &data, bool toPhone)
