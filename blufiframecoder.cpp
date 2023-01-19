@@ -61,7 +61,7 @@ void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhon
 
         if (remaining > m_fragmentSize)
         {
-            packet.resize(Q_OFFSETOF(BlufiFrameHeader, data) + 2 + m_fragmentSize + 2);
+            packet.resize(Q_OFFSETOF(BlufiFrameHeader, data) + 2 + m_fragmentSize);
 
             header = reinterpret_cast<BlufiFrameHeader *>(packet.data());
 
@@ -73,7 +73,7 @@ void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhon
         }
         else
         {
-            packet.resize(Q_OFFSETOF(BlufiFrameHeader, data) + remaining + 2);
+            packet.resize(Q_OFFSETOF(BlufiFrameHeader, data) + remaining);
 
             header = reinterpret_cast<BlufiFrameHeader *>(packet.data());
             header->dataSize = static_cast<quint8>(remaining);
@@ -97,8 +97,8 @@ void BlufiFrameCoder::sendFrame(quint8 type, const QByteArray &data, bool toPhon
             quint16 checksum = m_checksumHandler(header->sequenceNo, dataToBeValidated);
             quint8 checksumLow = static_cast<quint8>(checksum);
             quint8 checksumHigh = static_cast<quint8>(checksum >> 8);
-            header->data[header->dataSize] = checksumLow;
-            header->data[header->dataSize + 1] = checksumHigh;
+            packet.append(checksumLow);
+            packet.append(checksumHigh);
         }
 
         if (header->frameType == FRAME_CONTROL || (header->frameSubType != DATA_NEGOTIATION && header->frameSubType != DATA_ERROR))
