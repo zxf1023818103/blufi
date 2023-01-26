@@ -81,7 +81,7 @@ jobs:
               fi
             fi
             
-            cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=$triplet-gcc -DCMAKE_CXX_COMPILER:FILEPATH=$triplet-g++ -CMAKE_FIND_ROOT_PATH:FILEPATH=/usr/$triplet"
+            cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=$triplet-gcc -DCMAKE_CXX_COMPILER:FILEPATH=$triplet-g++ -DCMAKE_FIND_ROOT_PATH:FILEPATH=/usr/$triplet"
 
             cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_SYSTEM_NAME:STRING=Linux -DCMAKE_SYSTEM_PROCESSOR:STRING=$arch $cmake_compiler_opt
 
