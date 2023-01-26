@@ -1,0 +1,103 @@
+name: Build and Release
+
+on:
+  push:
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Project
+        run: |
+          sudo apt-get install -y lsb-core
+
+          sudo rm /etc/apt/sources.list
+
+          codename=$(lsb_release -cs)
+          mirror_url="http://archive.ubuntu.com/ubuntu"
+          port_mirror_url="http://ports.ubuntu.com/"
+          for section1 in {$codename,$codename-updates,$codename-backports,$codename-security}
+          do
+            echo "deb [arch=amd64,i386] $mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null
+            echo "deb-src [arch=amd64,i386] $mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null        
+            echo "deb [arch-=amd64,i386] $port_mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null
+            echo "deb-src [arch-=amd64,i386] $port_mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null
+          done
+
+          architectures="amd64 i386 armhf arm64 ppc64el s390x riscv64"
+          for arch in $architectures
+          do
+            sudo dpkg --add-architecture $arch
+          done
+
+          sudo apt-get update -y
+
+          depends="cmake ninja-build qt6-tools-dev-tools qt6-l10n-tools"
+          for arch in $architectures
+          do
+            depends="$depends qt6-tools-dev:$arch qt6-base-dev:$arch qt6-connectivity-dev:$arch libssl-dev:$arch"
+            if [ $(dpkg-architecture -q DEB_HOST_ARCH) == $arch ]; then
+              depends="$depends gcc g++"
+            else
+              if [ $arch == amd64 ]; then
+                depends="$depends gcc-x86-64-linux-gnu g++-x86-64-linux-gnu"
+              elif [ $arch == i386 ]; then
+                depends="$depends gcc-i686-linux-gnu g++-i686-linux-gnu"
+              elif [ $arch == armhf ]; then
+                depends="$depends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
+              elif [ $arch == arm64 ]; then
+                depends="$depends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu"
+              elif [ $arch == ppc64el ]; then
+                depends="$depends gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu"
+              elif [ $arch == s390x ]; then
+                depends="$depends gcc-s390x-linux-gnu g++-s390x-linux-gnu"
+              elif [ $arch == riscv64 ]; then
+                depends="$depends gcc-riscv64-linux-gnu g++-riscv64-linux-gnu"
+              fi
+            fi
+          done
+
+          sudo apt install -y $depends
+
+          for arch in $architectures
+          do
+            if [ $(dpkg-architecture -q DEB_HOST_ARCH) != $arch ]; then
+              if [ $arch == amd64 ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=x86_64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=x86_64-linux-gnu-g++"
+              elif [ $arch == i386 ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=i686-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=i686-linux-gnu-g++"
+              elif [ $arch == armhf ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER:FILEPATH=arm-linux-gnueabihf-g++"
+              elif [ $arch == arm64 ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=aarch64-linux-gnu-g++"
+              elif [ $arch == ppc64el ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=powerpc64le-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=powerpc64le-linux-gnu-g++"
+              elif [ $arch == s390x ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=s390x-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=s390x-linux-gnu-g++"
+              elif [ $arch == riscv64 ]; then
+                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=riscv64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=riscv64-linux-gnu-g++"
+              fi
+            fi
+
+            cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_SYSTEM_NAME:STRING=Linux -DCMAKE_SYSTEM_PROCESSOR:STRING=$arch $cmake_compiler_opt
+
+            cd build-$arch
+            cmake --build .
+            cpack -G DEB -B $(readlink -f $(pwd)/..)
+            cd ..
+          done
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, "refs/tags/")
+        with:
+          fail_on_unmatched_files: true
+          files: ${{ github.workspace }}/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
