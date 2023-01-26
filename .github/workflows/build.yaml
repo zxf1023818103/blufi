@@ -67,19 +67,21 @@ jobs:
           do
             if [ $(dpkg-architecture -q DEB_HOST_ARCH) != $arch ]; then
               if [ $arch == amd64 ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=x86_64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=x86_64-linux-gnu-g++"
+                triplet=x86_64-linux-gnu
               elif [ $arch == armhf ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER:FILEPATH=arm-linux-gnueabihf-g++"
+                triplet=arm-linux-gnueabihf
               elif [ $arch == arm64 ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=aarch64-linux-gnu-g++"
+                triplet=aarch64-linux-gnu
               elif [ $arch == ppc64el ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=powerpc64le-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=powerpc64le-linux-gnu-g++"
+                triplet=powerpc64le-linux-gnu
               elif [ $arch == s390x ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=s390x-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=s390x-linux-gnu-g++"
+                triplet=s390x-linux-gnu
               elif [ $arch == riscv64 ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=riscv64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=riscv64-linux-gnu-g++"
+                triplet=riscv64-linux-gnu
               fi
             fi
+            
+            cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=$triplet-gcc -DCMAKE_CXX_COMPILER:FILEPATH=$triplet-g++ -CMAKE_FIND_ROOT_PATH:FILEPATH=/usr/$triplet"
 
             cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_SYSTEM_NAME:STRING=Linux -DCMAKE_SYSTEM_PROCESSOR:STRING=$arch $cmake_compiler_opt
 
