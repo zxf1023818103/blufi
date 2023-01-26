@@ -65,20 +65,18 @@ jobs:
 
           for arch in $architectures
           do
-            if [ $(dpkg-architecture -q DEB_HOST_ARCH) != $arch ]; then
-              if [ $arch == amd64 ]; then
-                triplet=x86_64-linux-gnu
-              elif [ $arch == armhf ]; then
-                triplet=arm-linux-gnueabihf
-              elif [ $arch == arm64 ]; then
-                triplet=aarch64-linux-gnu
-              elif [ $arch == ppc64el ]; then
-                triplet=powerpc64le-linux-gnu
-              elif [ $arch == s390x ]; then
-                triplet=s390x-linux-gnu
-              elif [ $arch == riscv64 ]; then
-                triplet=riscv64-linux-gnu
-              fi
+            if [ $arch == amd64 ]; then
+              triplet=x86_64-linux-gnu
+            elif [ $arch == armhf ]; then
+              triplet=arm-linux-gnueabihf
+            elif [ $arch == arm64 ]; then
+              triplet=aarch64-linux-gnu
+            elif [ $arch == ppc64el ]; then
+              triplet=powerpc64le-linux-gnu
+            elif [ $arch == s390x ]; then
+              triplet=s390x-linux-gnu
+            elif [ $arch == riscv64 ]; then
+              triplet=riscv64-linux-gnu
             fi
             
             cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=$triplet-gcc -DCMAKE_CXX_COMPILER:FILEPATH=$triplet-g++ -DCMAKE_FIND_ROOT_PATH:FILEPATH=/usr/$triplet"
