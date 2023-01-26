@@ -30,7 +30,7 @@ jobs:
             echo "deb-src [arch-=amd64,i386] $port_mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null
           done
 
-          architectures="amd64 i386 armhf arm64 ppc64el s390x riscv64"
+          architectures="amd64 armhf arm64 ppc64el s390x riscv64"
           for arch in $architectures
           do
             sudo dpkg --add-architecture $arch
@@ -47,8 +47,6 @@ jobs:
             else
               if [ $arch == amd64 ]; then
                 depends="$depends gcc-x86-64-linux-gnu g++-x86-64-linux-gnu"
-              elif [ $arch == i386 ]; then
-                depends="$depends gcc-i686-linux-gnu g++-i686-linux-gnu"
               elif [ $arch == armhf ]; then
                 depends="$depends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
               elif [ $arch == arm64 ]; then
@@ -63,15 +61,13 @@ jobs:
             fi
           done
 
-          sudo apt install -y $depends
+          sudo apt-get install -y $depends
 
           for arch in $architectures
           do
             if [ $(dpkg-architecture -q DEB_HOST_ARCH) != $arch ]; then
               if [ $arch == amd64 ]; then
                 cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=x86_64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=x86_64-linux-gnu-g++"
-              elif [ $arch == i386 ]; then
-                cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=i686-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=i686-linux-gnu-g++"
               elif [ $arch == armhf ]; then
                 cmake_compiler_opt="-DCMAKE_C_COMPILER:FILEPATH=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER:FILEPATH=arm-linux-gnueabihf-g++"
               elif [ $arch == arm64 ]; then
