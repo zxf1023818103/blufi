@@ -3,9 +3,7 @@ set(CMAKE_C_COMPILER riscv64-linux-gnu-gcc)
 set(CMAKE_CXX_COMPILER riscv64-linux-gnu-g++)
 set(CMAKE_SYSTEM_PROCESSOR riscv64)
 
-if(EXISTS /usr/riscv64-linux-gnu)
-  set(ENV{OPENSSL_ROOT_DIR} "/usr/riscv64-linux-gnu;/usr/lib/riscv64-linux-gnu")
-endif()
+set(ENV{OPENSSL_ROOT_DIR} "/usr/riscv64-linux-gnu;/usr/lib/riscv64-linux-gnu")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
