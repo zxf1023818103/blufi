@@ -5,6 +5,7 @@ set(CMAKE_SYSTEM_PROCESSOR arm64)
 
 if(EXISTS /usr/aarch64-linux-gnu)
   set(CMAKE_FIND_ROOT_PATH "/usr/aarch64-linux-gnu;/usr/lib/aarch64-linux-gnu")
+  set(ENV{OPENSSL_ROOT_PATH} ${CMAKE_FIND_ROOT_PATH})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

@@ -5,6 +5,7 @@ set(CMAKE_SYSTEM_PROCESSOR riscv64)
 
 if(EXISTS /usr/riscv64-linux-gnu)
   set(CMAKE_FIND_ROOT_PATH "/usr/riscv64-linux-gnu;/usr/lib/riscv64-linux-gnu")
+  set(ENV{OPENSSL_ROOT_PATH} ${CMAKE_FIND_ROOT_PATH})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

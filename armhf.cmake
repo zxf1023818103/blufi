@@ -5,6 +5,7 @@ set(CMAKE_SYSTEM_PROCESSOR armhf)
 
 if(EXISTS /usr/arm-linux-gnueabihf)
   set(CMAKE_FIND_ROOT_PATH "/usr/arm-linux-gnueabihf;/usr/lib/arm-linux-gnueabihf")
+  set(ENV{OPENSSL_ROOT_PATH} ${CMAKE_FIND_ROOT_PATH})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

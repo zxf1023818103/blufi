@@ -5,6 +5,7 @@ set(CMAKE_SYSTEM_PROCESSOR s390x)
 
 if(EXISTS /usr/s390x-linux-gnu)
   set(CMAKE_FIND_ROOT_PATH "/usr/s390x-linux-gnu;/usr/lib/s390x-linux-gnu")
+  set(ENV{OPENSSL_ROOT_PATH} ${CMAKE_FIND_ROOT_PATH})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

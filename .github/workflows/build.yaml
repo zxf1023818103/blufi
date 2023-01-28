@@ -20,8 +20,8 @@ jobs:
           sudo rm /etc/apt/sources.list
 
           codename=$(lsb_release -cs)
-          mirror_url="http://archive.ubuntu.com/ubuntu"
-          port_mirror_url="http://ports.ubuntu.com/"
+          mirror_url="http://azure.archive.ubuntu.com/ubuntu"
+          port_mirror_url="http://azure.ports.ubuntu.com/"
           for section1 in {$codename,$codename-updates,$codename-backports,$codename-security}
           do
             echo "deb [arch=amd64,i386] $mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null

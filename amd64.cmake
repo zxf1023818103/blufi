@@ -5,6 +5,7 @@ set(CMAKE_SYSTEM_PROCESSOR amd64)
 
 if(EXISTS /usr/x86_64-linux-gnu)
   set(CMAKE_FIND_ROOT_PATH "/usr/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu")
+  set(ENV{OPENSSL_ROOT_PATH} ${CMAKE_FIND_ROOT_PATH})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
