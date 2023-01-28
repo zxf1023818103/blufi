@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build Project
+      - name: Add Architectures
         run: |
           sudo apt-get install -y lsb-core
 
@@ -61,8 +61,15 @@ jobs:
             fi
           done
 
-          sudo apt-get install -y $depends
+          echo "DEPENDS=\"$depends\"" >> $GITHUB_ENV
 
+      - name: Install Dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: ${{ env.DEPENDS }}
+          version: 1.0
+
+        - name: Build
           for arch in $architectures
           do
             cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING=$arch.cmake
