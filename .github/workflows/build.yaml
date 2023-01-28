@@ -61,8 +61,7 @@ jobs:
             fi
           done
 
-          echo "DEPENDS=\"$depends\"" >> $GITHUB_ENV
-
+          echo DEPENDS="$depends" >> $GITHUB_ENV
       - name: Install Dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
