@@ -68,13 +68,14 @@ jobs:
             cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING=$arch.cmake
 
             cd build-$arch
-            cmake --build .
+            cmake --build . --parallel
             cpack -G DEB -B $(readlink -f $(pwd)/..)
             cd ..
           done
 
       - name: Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           fail_on_unmatched_files: true
           files: ${{ github.workspace }}/*.deb
