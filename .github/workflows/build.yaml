@@ -17,13 +17,13 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-          path: /home/runner/work/apt
+          path: ${{ runner.temp }}/apt
           key: apt-cache
 
       - name: Restore Dependencies
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          sudo cp /home/runner/work/apt/*.deb /var/cache/apt/archives
+          sudo cp ${{ runner.temp }}/apt/*.deb /var/cache/apt/archives
 
       - name: Build
         run: |
@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Copy Packages to Cache Directory
-        if: steps.cache.outputs.cache-hit == 'false'
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          mkdir apt
-          cp /var/cache/apt/archives/*.deb /home/runner/work/apt
+          mkdir ${{ runner.temp }}/apt
+          cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
