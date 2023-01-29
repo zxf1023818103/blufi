@@ -13,11 +13,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Restore Dependencies
+      - name: Cache Dependencies
         uses: actions/cache@v3
+        id: cache
         with:
-          path: /var/cache/apt/archives/*.deb
+          path: ${{ runner.temp }}/apt/*.deb
           key: apt-cache
+
+      - name: Restore Dependencies
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          sudo cp ${{ runner.temp }}/apt/*.deb /var/cache/apt/archives
 
       - name: Build
         run: |
@@ -89,3 +95,9 @@ jobs:
           files: ${{ github.workspace }}/*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy Packages to Cache Directory
+        if: steps.cache.outputs.cache-hit == 'false'
+        run: |
+          mkdir ${{ runner.temp }}/apt
+          cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
