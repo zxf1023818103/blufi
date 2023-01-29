@@ -83,7 +83,8 @@ jobs:
 
             cd build-$arch
             cmake --build . --parallel
-            cpack -G DEB -B $(readlink -f $(pwd)/..)
+            cpack -G DEB
+            mv *.deb ..
             cd ..
           done
 

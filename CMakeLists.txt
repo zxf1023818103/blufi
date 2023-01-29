@@ -52,6 +52,9 @@ add_compile_definitions(GIT_BRANCH="${GIT_BRANCH}")
 
 if (NOT "${GIT_TAG}" STREQUAL "")
   add_compile_definitions(GIT_TAG="${GIT_TAG}")
+  set(CPACK_PACKAGE_VERSION "${GIT_DIFF}${GIT_TAG}")
+else()
+  set(CPACK_PACKAGE_VERSION "0${GIT_DIFF}git.${GIT_REV}")
 endif()
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core LinguistTools Bluetooth)
@@ -108,7 +111,6 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Blufi Client and Server Applications")
 set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README.md)
 set(CPACK_PACKAGE_VENDOR "Zeng Xiangfei")
 set(CPACK_PACKAGE_LICENSE "GPL-3.0")
-set(CPACK_PACKAGE_VERSION "0${GIT_DIFF}git.${GIT_REV}")
 set(CPACK_PACKAGE_CONTACT "zxf1023818103@gmail.com")
 
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6bluetooth6, libssl3, libcap2-bin")
