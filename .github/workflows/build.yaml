@@ -98,7 +98,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Copy Packages to Cache Directory
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir ${{ runner.temp }}/apt
           cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
