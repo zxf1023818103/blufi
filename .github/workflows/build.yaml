@@ -17,7 +17,7 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-          path: ${{ runner.temp }}/apt/*.deb
+          path: /tmp/apt/*.deb
           key: apt-cache
 
       - name: Restore Dependencies
@@ -99,5 +99,5 @@ jobs:
       - name: Copy Packages to Cache Directory
         if: steps.cache.outputs.cache-hit == 'false'
         run: |
-          mkdir ${{ runner.temp }}/apt
-          cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
+          mkdir /tmp/apt
+          cp /var/cache/apt/archives/*.deb /tmp/apt
