@@ -52,7 +52,7 @@ add_compile_definitions(GIT_BRANCH="${GIT_BRANCH}")
 
 if (NOT "${GIT_TAG}" STREQUAL "")
   add_compile_definitions(GIT_TAG="${GIT_TAG}")
-  set(CPACK_PACKAGE_VERSION "${GIT_DIFF}${GIT_TAG}")
+  set(CPACK_PACKAGE_VERSION "${GIT_TAG}")
 else()
   set(CPACK_PACKAGE_VERSION "0${GIT_DIFF}git.${GIT_REV}")
 endif()
