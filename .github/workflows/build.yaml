@@ -99,5 +99,8 @@ jobs:
 
       - name: Copy Packages to Cache Directory
         run: |
+          if [ -e ${{ runner.temp }}/apt ]; then
+            rm -rf ${{ runner.temp }}/apt
+          fi
           mkdir ${{ runner.temp }}/apt
           cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
