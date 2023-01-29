@@ -103,6 +103,17 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
+if (WIN32)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    file(GLOB QT_QPA_PLATFORM_PLUGIN_PATH ${QT_DIR}/../../debug/Qt6/plugins)
+  else()
+    file(GLOB QT_QPA_PLATFORM_PLUGIN_PATH ${QT_DIR}/../../Qt6/plugins)
+  endif()
+  set(TARBALL_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_NAME})
+  add_custom_command(TARGET ALL_BUILD POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -DNAME=${TARBALL_NAME} -DQT_QPA_PLATFORM_PLUGIN_PATH:PATH=${QT_QPA_PLATFORM_PLUGIN_PATH} -P ${CMAKE_CURRENT_LIST_DIR}/generate_tarball.cmake)
+endif()
+
 install(TARGETS bluficlient blufiserver)
 
 set(CPACK_PACKAGE_NAME blufi)

@@ -6,8 +6,8 @@ on:
     - '*'
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  debian-package-build:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -104,3 +104,52 @@ jobs:
           fi
           mkdir ${{ runner.temp }}/apt
           cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
+
+  windows-package-build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: C:/vcpkg/installed
+          key: vcpkg-cache
+      
+      - name: Build
+        shell: pwsh
+        run: |
+          cd C:\vcpkg
+          git pull
+
+          $depends = @()
+          $triplets = "arm64-windows", "x86-windows", "x64-windows"
+          foreach ($triplet in $triplets) {
+            $depends += "qtconnectivity:$triplet"
+          }
+
+          .\vcpkg.exe install $depends
+          
+          cd -
+
+          foreach ($triplet in $triplets) {
+            cmake -Bbuild-$triplet -S. -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="$triplet"
+            cd build-$triplet
+            mv *.zip ..
+            mv *.7z ..            
+            cd -
+          }
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            ${{ github.workspace }}/*.7z
+            ${{ github.workspace }}/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
