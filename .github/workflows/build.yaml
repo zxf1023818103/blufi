@@ -62,13 +62,15 @@ jobs:
           done
 
           echo DEPENDS="$depends" >> $GITHUB_ENV
+
       - name: Install Dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
           packages: ${{ env.DEPENDS }}
           version: 1.0
 
-        - name: Build
+      - name: Build
+        run: |
           for arch in $architectures
           do
             cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING=$arch.cmake
