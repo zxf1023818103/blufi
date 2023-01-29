@@ -15,7 +15,7 @@ jobs:
 
       - name: Restore Dependencies
         id: cache
-        use: actions/cache/restore@v3
+        uses: actions/cache/restore@v3
         with:
           path: /var/cache/apt/archives
           key: apt-cache
@@ -77,7 +77,7 @@ jobs:
       
       - name: Restore Dependencies
         id: cache
-        use: actions/cache/cache@v3
+        uses: actions/cache/cache@v3
         with:
           path: /var/cache/apt/archives/*.deb
           key: apt-cache
