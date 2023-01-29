@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Restore Dependencies
         id: restore
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: /var/cache/apt/archives
           key: apt-cache
-
-      - name: Checkout
-        uses: actions/checkout@v2
 
       - name: Add Architectures
         run: |
@@ -74,12 +74,6 @@ jobs:
         if: steps.restore.outputs.cache-hit != 'true'
         run: |
           sudo apt-get install -y --download-only ${{ env.DEPENDS }}
-      
-      - name: Save Dependencies
-        uses: actions/cache/cache@v3
-        with:
-          path: /var/cache/apt/archives/*.deb
-          key: apt-cache
       
       - name: Install Dependencies
         run: |
