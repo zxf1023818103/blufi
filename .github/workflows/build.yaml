@@ -69,7 +69,7 @@ jobs:
             fi
           done
 
-          sudo apt-get install -y ${{ env.DEPENDS }}
+          sudo apt-get install -y $depends
 
           for arch in $architectures
           do
