@@ -13,6 +13,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Restore Dependencies
+        id: cache
+        use: actions/cache/restore@v3
+        with:
+          path: /var/cache/apt/archives
+          key: apt-cache
+
       - name: Add Architectures
         run: |
           sudo apt-get install -y lsb-core
@@ -63,11 +70,21 @@ jobs:
 
           echo DEPENDS="$depends" >> $GITHUB_ENV
 
-      - name: Install Dependencies
-        uses: awalsh128/cache-apt-pkgs-action@latest
+      - name: Download Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y --download-only ${{ env.DEPENDS }}
+      
+      - name: Restore Dependencies
+        id: cache
+        use: actions/cache/cache@v3
         with:
-          packages: ${{ env.DEPENDS }}
-          version: 1.0
+          path: /var/cache/apt/archives/*.deb
+          key: apt-cache
+      
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install -y ${{ env.DEPENDS }}
 
       - name: Build
         run: |
