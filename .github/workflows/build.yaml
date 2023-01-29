@@ -14,14 +14,15 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Restore Dependencies
-        id: restore
         uses: actions/cache@v3
         with:
-          path: /var/cache/apt/archives
+          path: /var/cache/apt/archives/*.deb
           key: apt-cache
 
-      - name: Add Architectures
+      - name: Build
         run: |
+          echo 'Binary::apt::APT::Keep-Downloaded-Packages "1";' | sudo tee /etc/apt/apt.conf.d/10apt-keep-downloads
+
           sudo apt-get install -y lsb-core
 
           sudo rm /etc/apt/sources.list
@@ -68,19 +69,8 @@ jobs:
             fi
           done
 
-          echo DEPENDS="$depends" >> $GITHUB_ENV
-
-      - name: Download Dependencies
-        if: steps.restore.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get install -y --download-only ${{ env.DEPENDS }}
-      
-      - name: Install Dependencies
-        run: |
           sudo apt-get install -y ${{ env.DEPENDS }}
 
-      - name: Build
-        run: |
           for arch in $architectures
           do
             cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING=$arch.cmake
