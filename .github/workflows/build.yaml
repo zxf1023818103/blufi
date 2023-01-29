@@ -17,13 +17,13 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-          path: apt
+          path: /home/runner/work/apt
           key: apt-cache
 
       - name: Restore Dependencies
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          sudo cp apt/*.deb /var/cache/apt/archives
+          sudo cp /home/runner/work/apt/*.deb /var/cache/apt/archives
 
       - name: Build
         run: |
@@ -100,4 +100,4 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'false'
         run: |
           mkdir apt
-          cp /var/cache/apt/archives/*.deb apt
+          cp /var/cache/apt/archives/*.deb /home/runner/work/apt
