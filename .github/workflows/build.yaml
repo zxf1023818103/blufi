@@ -138,6 +138,8 @@ jobs:
           foreach ($triplet in $triplets) {
             cmake -Bbuild-$triplet -S. -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="$triplet"
             cd build-$triplet
+            cpack -G ZIP
+            cpack -G 7Z
             mv *.zip ..
             mv *.7z ..            
             cd -
