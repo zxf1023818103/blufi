@@ -103,7 +103,13 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-install(IMPORTED_RUNTIME_ARTIFACTS bluficlient blufiserver)
+install(TARGETS bluficlient blufiserver)
+
+if(WIN32)
+  include(GNUInstallDirs)
+  install(TARGETS bluficlient blufiserver RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies)
+  install(RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" POST_EXCLUDE_REGEXES ".*system32/.*\\.dll")
+endif()
 
 set(CPACK_PACKAGE_NAME blufi)
 set(CPACK_PACKAGE_DESCRIPTION "Configure Wi-Fi network for IoT device via Bluetooth channel through Blufi protocol.")
