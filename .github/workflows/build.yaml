@@ -128,7 +128,8 @@ jobs:
           $depends = @()
           $triplets = "arm64-windows", "x86-windows", "x64-windows"
           foreach ($triplet in $triplets) {
-            $depends += "qtconnectivity:$triplet qttools:$triplet"
+            $depends += "qtconnectivity:$triplet"
+            $depends += "qttools:$triplet"
           }
 
           .\vcpkg.exe install $depends
