@@ -133,12 +133,15 @@ jobs:
           }
 
           .\vcpkg.exe install $depends
+
+          .\vcpkg.exe upgrade --no-dry-run
           
           cd -
 
           foreach ($triplet in $triplets) {
-            cmake -Bbuild-$triplet -S. -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="$triplet"
+            cmake -B build-$triplet -S . -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="$triplet"
             cd build-$triplet
+            cmake --build . --config Release
             cpack -G ZIP
             cpack -G 7Z
             mv *.zip ..
