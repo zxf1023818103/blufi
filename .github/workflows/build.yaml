@@ -9,6 +9,10 @@ jobs:
   debian-package-build:
     name: Build Debian Pacakges
 
+    strategy:
+      matrix:
+        arch: [amd64, armhf, arm64, ppc64el, s390x, riscv64]
+
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +24,7 @@ jobs:
         id: cache
         with:
           path: ${{ runner.temp }}/apt
-          key: apt-cache
+          key: apt-cache-${{ matrix.arch }}
 
       - name: Restore Dependencies
         if: steps.cache.outputs.cache-hit == 'true'
@@ -46,49 +50,39 @@ jobs:
             echo "deb-src [arch-=amd64,i386] $port_mirror_url $section1 main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list >> /dev/null
           done
 
-          architectures="amd64 armhf arm64 ppc64el s390x riscv64"
-          for arch in $architectures
-          do
-            sudo dpkg --add-architecture $arch
-          done
+          sudo dpkg --add-architecture ${{ matrix.arch }}
 
           sudo apt-get update -y
 
           depends="cmake ninja-build qt6-tools-dev-tools qt6-l10n-tools"
-          for arch in $architectures
-          do
-            depends="$depends qt6-tools-dev:$arch qt6-base-dev:$arch qt6-connectivity-dev:$arch libssl-dev:$arch"
-            if [ $(dpkg-architecture -q DEB_HOST_ARCH) == $arch ]; then
-              depends="$depends gcc g++"
-            else
-              if [ $arch == amd64 ]; then
-                depends="$depends gcc-x86-64-linux-gnu g++-x86-64-linux-gnu"
-              elif [ $arch == armhf ]; then
-                depends="$depends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
-              elif [ $arch == arm64 ]; then
-                depends="$depends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu"
-              elif [ $arch == ppc64el ]; then
-                depends="$depends gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu"
-              elif [ $arch == s390x ]; then
-                depends="$depends gcc-s390x-linux-gnu g++-s390x-linux-gnu"
-              elif [ $arch == riscv64 ]; then
-                depends="$depends gcc-riscv64-linux-gnu g++-riscv64-linux-gnu"
-              fi
+          depends="$depends qt6-tools-dev:${{ matrix.arch }} qt6-base-dev:${{ matrix.arch }} qt6-connectivity-dev:${{ matrix.arch }} libssl-dev:${{ matrix.arch }}"
+          if [ $(dpkg-architecture -q DEB_HOST_ARCH) == ${{ matrix.arch }} ]; then
+            depends="$depends gcc g++"
+          else
+            if [ ${{ matrix.arch }} == amd64 ]; then
+              depends="$depends gcc-x86-64-linux-gnu g++-x86-64-linux-gnu"
+            elif [ ${{ matrix.arch }} == armhf ]; then
+              depends="$depends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf"
+            elif [ ${{ matrix.arch }} == arm64 ]; then
+              depends="$depends gcc-aarch64-linux-gnu g++-aarch64-linux-gnu"
+            elif [ ${{ matrix.arch }} == ppc64el ]; then
+              depends="$depends gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu"
+            elif [ ${{ matrix.arch }} == s390x ]; then
+              depends="$depends gcc-s390x-linux-gnu g++-s390x-linux-gnu"
+            elif [ ${{ matrix.arch }} == riscv64 ]; then
+              depends="$depends gcc-riscv64-linux-gnu g++-riscv64-linux-gnu"
             fi
-          done
+          fi
 
           sudo apt-get install -y --no-install-recommends $depends
 
-          for arch in $architectures
-          do
-            cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-$arch -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING=$arch.cmake
+          cmake --no-warn-unused-cli -G "Ninja" -B$(pwd)/build-${{ matrix.arch }} -S$(pwd) -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING=${{ matrix.arch }}.cmake
 
-            cd build-$arch
-            cmake --build . --parallel
-            cpack -G DEB
-            mv *.deb ..
-            cd ..
-          done
+          cd build-${{ matrix.arch }}
+          cmake --build . --parallel
+          cpack -G DEB
+          mv *.deb ..
+          cd ..
 
       - name: Release
         uses: softprops/action-gh-release@v1
