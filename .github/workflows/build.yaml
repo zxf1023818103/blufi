@@ -101,10 +101,7 @@ jobs:
           mkdir ${{ runner.temp }}/apt
           cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
 
-  windows-package-build:
-    strategy:
-      matrix:
-        triplet: [arm64-windows, x86-windows, x64-windows]
+  windows-x86-package-build:
     
     name: Build Windows Packages
 
@@ -118,20 +115,22 @@ jobs:
         uses: actions/cache@v3
         id: cache
         with:
-          path: C:/vcpkg/installed
-          key: vcpkg-cache-${{ matrix.triplet }}
+          path: C:/Qt
+          key: qt-cache
       
       - name: Build
         shell: pwsh
+        env:
+          USERNAME: ${{ vars.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
         run: |
-          cd C:\vcpkg
-          git pull
-          .\vcpkg.exe install qtconnectivity:${{ matrix.triplet }} qttools:${{ matrix.triplet }}
-          .\vcpkg.exe upgrade --no-dry-run
-          cd -
+          Invoke-WebRequest -Uri "https://download.qt.io/official_releases/online_installers/qt-unified-windows-x64-online.exe" -OutFile ${{ runner.temp }}\qt-unified-windows-x64-online.exe
 
-          cmake -B build-${{ matrix.triplet }} -S . -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="${{ matrix.triplet }}"
-          cd build-${{ matrix.triplet }}
+          . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.tools.openssl
+
+          cmake -S. -Bbuild -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -DOPENSSL_ROOT_DIR="C:\Qt\Tools\OpenSSL\Win_x64" -T host=x64 -A x64
+
+          cd build
           cmake --build . --config Release
           cpack -G ZIP
           cpack -G 7Z
