@@ -127,18 +127,21 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
         run: |
           Invoke-WebRequest -Uri "https://download.qt.io/official_releases/online_installers/qt-unified-windows-x64-online.exe" -OutFile ${{ runner.temp }}\qt-unified-windows-x64-online.exe
+
           . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.tools.openssl
 
       - name: Build
         shell: pwsh
         run: |
           cmake -S. -Bbuild -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -DOPENSSL_ROOT_DIR="C:\Qt\Tools\OpenSSL\Win_x64" -T host=x64 -A x64
-          cmake --build build --config Release
-      
-      - name: Deploy
-        run: |
-          . C:\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe --debug .build\Release\
-          Compress
+
+          cd build
+          cmake --build . --config Release
+          cpack -G ZIP
+          cpack -G 7Z
+          mv *.zip ..
+          mv *.7z ..
+          cd -
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -146,6 +149,7 @@ jobs:
         with:
           fail_on_unmatched_files: true
           files: |
+            ${{ github.workspace }}/*.7z
             ${{ github.workspace }}/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
