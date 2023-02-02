@@ -106,6 +106,8 @@ jobs:
     name: Build Windows Packages
 
     runs-on: windows-latest
+    
+    environment: qt
 
     steps:
       - name: Checkout
@@ -116,10 +118,10 @@ jobs:
         id: cache
         with:
           path: C:/Qt
-          key: qt-cache
+          key: qt-624-cache
       
-      - name: Build
-        shell: pwsh
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         env:
           USERNAME: ${{ vars.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
@@ -128,6 +130,9 @@ jobs:
 
           . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.tools.openssl
 
+      - name: Build
+        shell: pwsh
+        run: |
           cmake -S. -Bbuild -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -DOPENSSL_ROOT_DIR="C:\Qt\Tools\OpenSSL\Win_x64" -T host=x64 -A x64
 
           cd build
