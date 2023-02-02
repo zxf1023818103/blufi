@@ -7,6 +7,8 @@ on:
 
 jobs:
   debian-package-build:
+    name: Build Debian Pacakges
+
     runs-on: ubuntu-latest
 
     steps:
@@ -106,6 +108,12 @@ jobs:
           cp /var/cache/apt/archives/*.deb ${{ runner.temp }}/apt
 
   windows-package-build:
+    strategy:
+      matrix:
+        triplet: [arm64-windows, x86-windows, x64-windows]
+    
+    name: Build Windows Packages
+
     runs-on: windows-latest
 
     steps:
@@ -117,37 +125,25 @@ jobs:
         id: cache
         with:
           path: C:/vcpkg/installed
-          key: vcpkg-cache
+          key: vcpkg-cache-${{ matrix.triplet }}
       
       - name: Build
         shell: pwsh
         run: |
           cd C:\vcpkg
           git pull
-
-          $depends = @()
-          $triplets = "arm64-windows", "x86-windows", "x64-windows"
-          foreach ($triplet in $triplets) {
-            $depends += "qtconnectivity:$triplet"
-            $depends += "qttools:$triplet"
-          }
-
-          .\vcpkg.exe install $depends
-
+          .\vcpkg.exe install qtconnectivity:${{ matrix.triplet }} qttools:${{ matrix.triplet }}
           .\vcpkg.exe upgrade --no-dry-run
-          
           cd -
 
-          foreach ($triplet in $triplets) {
-            cmake -B build-$triplet -S . -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="$triplet"
-            cd build-$triplet
-            cmake --build . --config Release
-            cpack -G ZIP
-            cpack -G 7Z
-            mv *.zip ..
-            mv *.7z ..            
-            cd -
-          }
+          cmake -B build-${{ matrix.triplet }} -S . -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_TOOLCHAIN_FILE:STRING="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET:STRING="${{ matrix.triplet }}"
+          cd build-${{ matrix.triplet }}
+          cmake --build . --config Release
+          cpack -G ZIP
+          cpack -G 7Z
+          mv *.zip ..
+          mv *.7z ..
+          cd -
 
       - name: Release
         uses: softprops/action-gh-release@v1
