@@ -108,7 +108,7 @@ install(TARGETS bluficlient blufiserver)
 if(WIN32)
   include(GNUInstallDirs)
   install(TARGETS bluficlient blufiserver RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies)
-  install(RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" POST_EXCLUDE_REGEXES ".*system32/.*\\.dll")
+  install(RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" DIRECTORIES ${QT_DIR})
 endif()
 
 set(CPACK_PACKAGE_NAME blufi)
