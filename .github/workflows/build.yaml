@@ -151,6 +151,6 @@ jobs:
         with:
           fail_on_unmatched_files: true
           files: |
-            ${{ github.workspace }}/*.zip
+            ${{ github.workspace }}\*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
