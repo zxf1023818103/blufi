@@ -143,14 +143,15 @@ jobs:
           Remove-Item -Path .\Release\*.pdb, .\Release\*.lib
           $List = Get-ChildItem -Path .\*.json
           $PackageName = $List[0].Name.Replace('.json', '.zip')
-          Compress-Archive -Path .\Release\* -DestinationPath ..\$PackageName
-
+          Compress-Archive -Path .\Release\* -DestinationPath ${{ github.workspace }}\$PackageName
+          $PackagePath = ${{ github.workspace }}\$PackageName
+          $PackagePath = $PackagePath.Replace('\', '/')
+          echo "PACKAGE=$PackagePath" >> $env:GITHUB_ENV
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           fail_on_unmatched_files: true
-          files: |
-            ${{ github.workspace }}\*.zip
+          files: ${{ env.PACKAGE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
