@@ -128,7 +128,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://download.qt.io/official_releases/online_installers/qt-unified-windows-x64-online.exe" -OutFile ${{ runner.temp }}\qt-unified-windows-x64-online.exe
 
-          . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.qt6.624.win64_msvc2019_64_arm64
+          . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.qt6.624.win64_msvc2019_arm64
 
       - name: Build
         shell: pwsh
@@ -156,7 +156,7 @@ jobs:
 
           cd ${{ github.workspace }}
 
-          cmake -S. -DCMAKE_BUILD_TYPE=Release -Bbuild-arm64 -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -T host=x64 -A arm64
+          cmake -S. -DCMAKE_BUILD_TYPE=Release -Bbuild-arm64 -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_arm64\lib\cmake" -T host=x64 -A arm64
 
           cd build-arm64
           cmake --build . --config Release
