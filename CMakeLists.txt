@@ -98,17 +98,17 @@ add_executable(blufiserver
 target_link_libraries(blufiserver blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
 
 if(COMMAND qt_create_translation)
-    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+  qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+  qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
 install(TARGETS bluficlient blufiserver)
 
 if(WIN32)
-  include(GNUInstallDirs)
-  install(TARGETS bluficlient blufiserver RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies)
-  install(RUNTIME_DEPENDENCY_SET ${PROJECT_NAME}_runtime_dependencies PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-" POST_EXCLUDE_REGEXES ".*system32/.*\\.dll" DIRECTORIES ${QT_DIR})
+  set(CPACK_GENERATOR External)
+else()
+  set(CPACK_GENERATOR 7Z ZIP)
 endif()
 
 set(CPACK_PACKAGE_NAME blufi)
@@ -138,7 +138,7 @@ set(CPACK_RPM_PACKAGE_GROUP "Unspecified")
 #set(CPACK_RPM_PACKAGE_REQUIRES "qt6-qtconnectivity, libcap")
 #set(CPACK_RPM_PACKAGE_REQUIRES_POST "")
 set(CPACK_RPM_SPEC_MORE_DEFINE "%define debug_package %{nil}
-    %define __os_install_post %{nil}")
+  %define __os_install_post %{nil}")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
 set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA})

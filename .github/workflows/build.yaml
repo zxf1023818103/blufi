@@ -133,15 +133,17 @@ jobs:
       - name: Build
         shell: pwsh
         run: |
-          cmake -S. -Bbuild -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -DOPENSSL_ROOT_DIR="C:\Qt\Tools\OpenSSL\Win_x64" -T host=x64 -A x64
+          cmake -S. -DCMAKE_BUILD_TYPE=Release -Bbuild -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -DOPENSSL_ROOT_DIR="C:\Qt\Tools\OpenSSL\Win_x64" -T host=x64 -A x64
 
           cd build
           cmake --build . --config Release
-          cpack -G ZIP
-          cpack -G 7Z
-          mv *.zip ..
-          mv *.7z ..
-          cd -
+          cpack
+
+          . "C:\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe" .\Release
+          Remove-Item -Path .\Release\*.pdb, .\Release\*.lib
+          $List = Get-ChildItem -Path .\*.json
+          $PackageName = $List[0].Name.Replace('.json', '.zip')
+          Compress-Archive -Path .\Release\* -DestinationPath ..\$PackageName
 
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -149,7 +151,6 @@ jobs:
         with:
           fail_on_unmatched_files: true
           files: |
-            ${{ github.workspace }}/*.7z
             ${{ github.workspace }}/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
