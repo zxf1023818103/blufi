@@ -59,7 +59,7 @@ endif()
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core LinguistTools Bluetooth)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core LinguistTools Bluetooth)
-find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+#find_package(OpenSSL REQUIRED COMPONENTS Crypto)
 
 set(TS_FILES blufi_zh_CN.ts)
 
@@ -82,7 +82,8 @@ add_executable(bluficlient
   cpp.hint
   ${TS_FILES}
 )
-target_link_libraries(bluficlient blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
+target_link_libraries(bluficlient blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth)
+#target_link_libraries(bluficlient OpenSSL::Crypto)
 
 add_executable(blufiserver
   blufiservermain.cpp
@@ -95,7 +96,8 @@ add_executable(blufiserver
   cpp.hint
   ${TS_FILES}
 )
-target_link_libraries(blufiserver blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
+target_link_libraries(blufiserver blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth)
+#target_link_libraries(blufiserver OpenSSL::Crypto)
 
 if(COMMAND qt_create_translation)
   qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
@@ -119,7 +121,8 @@ set(CPACK_PACKAGE_VENDOR "Zeng Xiangfei")
 set(CPACK_PACKAGE_LICENSE "GPL-3.0")
 set(CPACK_PACKAGE_CONTACT "zxf1023818103@gmail.com")
 
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6bluetooth6, libssl3, libcap2-bin")
+#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6bluetooth6, libssl3, libcap2-bin")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6bluetooth6, libcap2-bin")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/zxf1023818103/blufi")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${CMAKE_SOURCE_DIR}/postinst)
 if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
