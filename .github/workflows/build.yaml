@@ -144,7 +144,7 @@ jobs:
           $List = Get-ChildItem -Path .\*.json
           $PackageName = $List[0].Name.Replace('.json', '.zip')
           Compress-Archive -Path .\Release\* -DestinationPath ${{ github.workspace }}\$PackageName
-          $PackagePath = ${{ github.workspace }}\$PackageName
+          $PackagePath = "${{ github.workspace }}\$PackageName"
           $PackagePath = $PackagePath.Replace('\', '/')
           echo "PACKAGE=$PackagePath" >> $env:GITHUB_ENV
       - name: Release
