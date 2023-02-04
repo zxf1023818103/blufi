@@ -128,7 +128,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://download.qt.io/official_releases/online_installers/qt-unified-windows-x64-online.exe" -OutFile ${{ runner.temp }}\qt-unified-windows-x64-online.exe
 
-          . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.qt6.624.win64_msvc2019_arm64
+          . ${{ runner.temp }}\qt-unified-windows-x64-online.exe in --ao --da --al -c --nd -m $env:USERNAME --pw $env:PASSWORD qt.qt6.624.addons.qtconnectivity qt.qt6.624.win64_msvc2019_64 qt.tools.openssl
 
       - name: Build
         shell: pwsh
@@ -137,46 +137,25 @@ jobs:
 
           cd ${{ github.workspace }}
 
-          cmake -S. -DCMAKE_BUILD_TYPE=Release -Bbuild-amd64 -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -T host=x64 -A x64
+          cmake -S. -DCMAKE_BUILD_TYPE=Release -Bbuild -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_64\lib\cmake" -DOPENSSL_ROOT_DIR="C:\Qt\Tools\OpenSSL\Win_x64" -T host=x64 -A x64
 
-          cd build-amd64
+          cd build
           cmake --build . --config Release
           cpack
 
-          . "C:\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe" --list source .\Release
+          . "C:\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe" .\Release
           Remove-Item -Path .\Release\*.pdb, .\Release\*.lib
           $List = Get-ChildItem -Path .\*.json
           $PackageName = $List[0].Name.Replace('.json', '.zip')
           Compress-Archive -Path .\Release\* -DestinationPath ${{ github.workspace }}\$PackageName
           $PackagePath = "${{ github.workspace }}\$PackageName"
           $PackagePath = $PackagePath.Replace('\', '/')
-          echo "PACKAGE_AMD64=$PackagePath" >> $env:GITHUB_ENV
-
-          & 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Launch-VsDevShell.ps1' -Arch arm64 -HostArch amd64
-
-          cd ${{ github.workspace }}
-
-          cmake -S. -DCMAKE_BUILD_TYPE=Release -Bbuild-arm64 -DCMAKE_PREFIX_PATH="C:\Qt\6.2.4\msvc2019_arm64\lib\cmake" -T host=x64 -A arm64
-
-          cd build-arm64
-          cmake --build . --config Release
-          cpack
-
-          . "C:\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe" --list source .\Release
-          Remove-Item -Path .\Release\*.pdb, .\Release\*.lib
-          $List = Get-ChildItem -Path .\*.json
-          $PackageName = $List[0].Name.Replace('.json', '.zip')
-          Compress-Archive -Path .\Release\* -DestinationPath ${{ github.workspace }}\$PackageName
-          $PackagePath = "${{ github.workspace }}\$PackageName"
-          $PackagePath = $PackagePath.Replace('\', '/')
-          echo "PACKAGE_ARM64=$PackagePath" >> $env:GITHUB_ENV
+          echo "PACKAGE=$PackagePath" >> $env:GITHUB_ENV
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           fail_on_unmatched_files: true
-          files: |
-            ${{ env.PACKAGE_AMD64 }}
-            ${{ env.PACKAGE_ARM64 }}
+          files: ${{ env.PACKAGE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
