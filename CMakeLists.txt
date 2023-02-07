@@ -29,6 +29,8 @@ else()
     RESULT_VARIABLE GIT_DIFF_RETURN)
   if (${GIT_DIFF_RETURN} EQUAL 0)
     set(GIT_DIFF "+")
+  else()
+    set(GIT_DIFF "-")
   endif()
 
   execute_process(
@@ -47,15 +49,16 @@ else()
   string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
 endif()
 
+if ("${GIT_TAG}" STREQUAL "")
+  set(GIT_TAG "0")
+endif()
+
+set(CPACK_PACKAGE_VERSION "${GIT_TAG}${GIT_DIFF}git.${GIT_REV}")
+
 add_compile_definitions(GIT_REV="${GIT_REV}")
 add_compile_definitions(GIT_BRANCH="${GIT_BRANCH}")
-
-if (NOT "${GIT_TAG}" STREQUAL "")
-  add_compile_definitions(GIT_TAG="${GIT_TAG}")
-  set(CPACK_PACKAGE_VERSION "${GIT_TAG}")
-else()
-  set(CPACK_PACKAGE_VERSION "0${GIT_DIFF}git.${GIT_REV}")
-endif()
+add_compile_definitions(GIT_TAG="${GIT_TAG}")
+add_compile_definitions(VERSION="${CPACK_PACKAGE_VERSION}")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core LinguistTools Bluetooth)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core LinguistTools Bluetooth)
