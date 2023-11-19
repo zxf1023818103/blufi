@@ -307,6 +307,8 @@ public slots:
 
     void sendGattDisconnectRequest(bool ack = false);
 
+    void sendBlufiVersion(char majorVersion, char minorVersion, bool ack = false);
+
 private slots:
     void parseDataFrame(BlufiFrameCoder::DataFrameTypes type, const QByteArrayView& data, bool toPhone);
 

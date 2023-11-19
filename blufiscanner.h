@@ -33,6 +33,8 @@ private:
 
     bool m_stopDiscoveryAtClientReadyEnabled = false;
 
+    bool m_init = false;
+
     QAtomicInt m_globalCount;
 
     QBluetoothDeviceDiscoveryAgent *m_discoveryAgent = nullptr;
@@ -50,7 +52,7 @@ public slots:
 
     inline void enableDeepScan(bool deepScanEnabled) { m_deepScanEnabled = deepScanEnabled; }
 
-    inline void enableStopDiscoveryAtClientReady(bool stopDiscoveryAtClientReadyEnabled) { m_stopDiscoveryAtClientReadyEnabled = m_stopDiscoveryAtClientReadyEnabled; }
+    inline void enableStopDiscoveryAtClientReady(bool stopDiscoveryAtClientReadyEnabled) { m_stopDiscoveryAtClientReadyEnabled = stopDiscoveryAtClientReadyEnabled; }
 
     inline bool deepScanEnabled() { return m_deepScanEnabled; }
 };

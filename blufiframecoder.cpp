@@ -1,5 +1,4 @@
 #include "blufiframecoder.h"
-#include "bluficlient.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QMetaEnum>
@@ -170,11 +169,13 @@ void BlufiFrameCoder::parseReceivedData(const QByteArray &data, bool toPhone)
             }
         }
         else {
-            qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << ERR_DATA_FORMAT;
+            // qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << ERR_DATA_FORMAT;
+            qWarning() << (QString(metaObject()->className()) + "::" + __func__) << ERR_DATA_FORMAT;
         }
     }
     else {
-        qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << ERR_DATA_FORMAT;
+        // qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << ERR_DATA_FORMAT;
+        qWarning() << (QString(metaObject()->className()) + "::" + __func__) << ERR_DATA_FORMAT;
     }
 }
 
@@ -550,7 +551,8 @@ void BlufiFrameCoder::sendAck(quint8 sequenceNo, bool toPhone)
 
 void BlufiFrameCoder::sendError(Errors error, bool toPhone, bool ack)
 {
-    qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << error;
+    // qWarning() << qobject_cast<BlufiClient *>(parent())->controller()->remoteName() << qobject_cast<BlufiClient *>(parent())->controller()->remoteAddress() << __func__ << error;
+    qWarning() << (QString(metaObject()->className()) + "::" + __func__) << error;
 
     QByteArray data;
     data.append(static_cast<quint8>(error));
@@ -585,4 +587,9 @@ void BlufiFrameCoder::sendNegotiationData(const QByteArray& data, bool toPhone, 
 void BlufiFrameCoder::sendGattDisconnectRequest(bool ack)
 {
     sendControlFrame(CONTROL_GATT_DISCONNECT, QByteArray(), false);
+}
+
+void BlufiFrameCoder::sendBlufiVersion(char majorVersion, char minorVersion, bool ack)
+{
+    sendDataFrame(DATA_VERSION, QByteArray().append(majorVersion).append(minorVersion), false, ack);
 }

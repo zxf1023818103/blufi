@@ -1,17 +1,19 @@
 #include "blufiscanner.h"
 #include "blufiframecoder.h"
+#include <QBluetoothPermission>
+#include <QCoreApplication>
+#include <QBluetoothLocalDevice>
 
 BlufiScanner::BlufiScanner(QObject *parent)
     : QObject{parent}
 {
-    m_discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
-    connect(m_discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &BlufiScanner::onDeviceDiscovered);
-    connect(m_discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &BlufiScanner::onScanFinished);
-    connect(m_discoveryAgent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &BlufiScanner::onScanFinished);
+
 }
 
 void BlufiScanner::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
 {
+    qDebug() << (QString(metaObject()->className()) + "::" + __func__) << info.name() << info.address() << info.deviceUuid();
+
     bool blufiServiceFound = false;
 
     auto serviceUuids = info.serviceUuids();
@@ -65,6 +67,43 @@ void BlufiScanner::onScanFinished()
 
 void BlufiScanner::start()
 {
+    if (!m_init) {
+        QBluetoothPermission permission {};
+        permission.setCommunicationModes(QBluetoothPermission::Default);
+
+        switch (qApp->checkPermission(permission)) {
+            case Qt::PermissionStatus::Undetermined: {
+                qApp->requestPermission(permission, this, &BlufiScanner::start);
+                return;
+            }
+
+            case Qt::PermissionStatus::Denied: {
+                qApp->exit(-1);
+                return;
+            }
+
+            case Qt::PermissionStatus::Granted: {
+                break;
+            }
+        }
+
+#ifndef Q_OS_IOS
+        auto devices = QBluetoothLocalDevice::allDevices();
+        if (devices.empty()) {
+            qApp->exit(-1);
+        }
+        m_discoveryAgent = new QBluetoothDeviceDiscoveryAgent(devices.back().address(), this);
+#else
+        m_discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
+#endif // Q_OS_IOS
+
+        connect(m_discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &BlufiScanner::onDeviceDiscovered);
+        connect(m_discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &BlufiScanner::onScanFinished);
+        connect(m_discoveryAgent, &QBluetoothDeviceDiscoveryAgent::canceled, this, &BlufiScanner::onScanFinished);
+
+        m_init = true;
+    }
+    
     m_discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 project(blufi LANGUAGES CXX)
 
@@ -60,19 +60,20 @@ add_compile_definitions(GIT_BRANCH="${GIT_BRANCH}")
 add_compile_definitions(GIT_TAG="${GIT_TAG}")
 add_compile_definitions(VERSION="${CPACK_PACKAGE_VERSION}")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core LinguistTools Bluetooth)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core LinguistTools Bluetooth)
+find_package(Qt6 REQUIRED COMPONENTS Core LinguistTools Bluetooth)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+
+qt_standard_project_setup(REQUIRES 6.5)
 
 set(TS_FILES blufi_zh_CN.ts)
 
-add_library(blufiframecoder
+qt_add_library(blufiframecoder STATIC
     blufiframecoder.cpp
     blufiframecoder.h
 )
-target_link_libraries(blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth)
+target_link_libraries(blufiframecoder PUBLIC Qt::Core Qt::Bluetooth)
 
-add_executable(bluficlient
+qt_add_executable(bluficlient
   bluficlientmain.cpp
   blufiscanner.cpp
   blufiscanner.h
@@ -85,9 +86,10 @@ add_executable(bluficlient
   cpp.hint
   ${TS_FILES}
 )
-target_link_libraries(bluficlient blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
+target_link_libraries(bluficlient PUBLIC blufiframecoder Qt::Core Qt::Bluetooth OpenSSL::Crypto)
+set_target_properties(bluficlient PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE)
 
-add_executable(blufiserver
+set(BLUFI_SERVER_SRCS
   blufiservermain.cpp
   blufiserver.cpp
   blufiserver.h
@@ -95,18 +97,49 @@ add_executable(blufiserver
   blufiserverframecoderadapter.h
   blufiserverapplication.cpp
   blufiserverapplication.h
+  blufiwlancontrolagent.h
   cpp.hint
-  ${TS_FILES}
 )
-target_link_libraries(blufiserver blufiframecoder Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Bluetooth OpenSSL::Crypto)
 
-if(COMMAND qt_create_translation)
-  qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-else()
-  qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+if (APPLE)
+  qt_add_executable(blufiserver
+    ${BLUFI_SERVER_SRCS}
+    blufiwlancontrolagent_darwin.mm
+    ${TS_FILES}
+  )
+  target_link_libraries(blufiserver PUBLIC blufiframecoder Qt::Core Qt::Bluetooth OpenSSL::Crypto)
+elseif (WIN32)
+  qt_add_executable(blufiserver
+    ${BLUFI_SERVER_SRCS}
+    blufiwlancontrolagent_win32.cpp
+    ${TS_FILES}
+  )
+  target_link_libraries(blufiserver PUBLIC blufiframecoder Qt::Core Qt::Bluetooth OpenSSL::Crypto)
+elseif (LINUX)
+  qt_add_executable(blufiserver
+    ${BLUFI_SERVER_SRCS}
+    blufiwlancontrolagent_networkmanager.cpp
+    ${TS_FILES}
+  )
+  find_package(Qt6 REQUIRED COMPONENTS Dbus)
+  target_link_libraries(blufiserver PUBLIC blufiframecoder Qt::Core Qt::Bluetooth Qt::Dbus OpenSSL::Crypto)
 endif()
 
-install(TARGETS bluficlient blufiserver)
+set_target_properties(blufiserver PROPERTIES WIN32_EXECUTABLE TRUE MACOSX_BUNDLE TRUE)
+
+if (APPLE)
+  if (IOS)
+    set_target_properties(bluficlient PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.cmake.ios.plist")
+    set_target_properties(blufiserver PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.cmake.ios.plist")
+  else()
+    set_target_properties(bluficlient PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.cmake.macos.plist")
+    set_target_properties(blufiserver PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/Info.cmake.macos.plist")
+  endif()
+endif()
+
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+
+install(TARGETS bluficlient blufiserver BUNDLE DESTINATION ${CMAKE_BINARY_DIR})
 
 if(WIN32)
   set(CPACK_GENERATOR External)
